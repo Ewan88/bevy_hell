@@ -1,7 +1,7 @@
 mod camera;
+mod input;
 mod map;
 mod player;
-mod input;
 
 use bevy::prelude::*;
 
