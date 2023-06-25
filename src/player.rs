@@ -1,5 +1,8 @@
 use bevy::prelude::*;
 
+#[derive(Component)]
+pub struct Player;
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
@@ -9,9 +12,12 @@ impl Plugin for PlayerPlugin {
 }
 
 pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(SpriteBundle {
-        texture: asset_server.load("sam.png"),
-        transform: Transform::from_xyz(0., 0., 1.),
-        ..Default::default()
-    });
+    commands.spawn((
+        SpriteBundle {
+            texture: asset_server.load("sam.png"),
+            transform: Transform::from_xyz(0., 0., 1.),
+            ..Default::default()
+        },
+        Player,
+    ));
 }
