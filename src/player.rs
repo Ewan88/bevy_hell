@@ -2,7 +2,20 @@ use super::loader::Icons;
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct Player;
+pub struct Player {
+    pub health: i32,
+}
+
+impl Player {
+    pub fn new() -> Self {
+        Self { health: 100 }
+    }
+
+    pub fn recieve_damage(&mut self, damage: i32) {
+        self.health -= damage;
+        println!("Player health: {}", self.health)
+    }
+}
 
 pub struct PlayerPlugin;
 
@@ -10,7 +23,8 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(
             setup_player.in_base_set(StartupSet::PostStartup),
-        );
+        )
+        .add_system(kill_player);
     }
 }
 
@@ -21,6 +35,16 @@ pub fn setup_player(mut commands: Commands, icons: Res<Icons>) {
             transform: Transform::from_xyz(0., 0., 1.),
             ..Default::default()
         },
-        Player,
+        Player::new(),
     ));
+}
+
+pub fn kill_player(
+    mut commands: Commands,
+    mut player_query: Query<(Entity, &Player)>,
+) {
+    let Ok((entity, player)) = player_query.get_single_mut() else { return; };
+    if player.health <= 0 {
+        commands.entity(entity).despawn();
+    }
 }
