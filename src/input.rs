@@ -1,5 +1,6 @@
-use crate::{camera::GameCamera, enemy::Enemy, player::Player};
+use crate::{bullet::Bullet, camera::GameCamera, player::Player};
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 pub struct InputPlugin;
 
@@ -43,19 +44,27 @@ fn keyboard_input_system(
 
 fn mouse_input_system(
     input: Res<Input<MouseButton>>,
-    player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
-    enemy_query: Query<(Entity, &Transform), (With<Enemy>, Without<Player>)>,
+    window: Query<&Window>,
+    camera_query: Query<(&Camera, &GlobalTransform), With<GameCamera>>,
+    player_query: Query<&Transform, With<Player>>,
     mut commands: Commands,
 ) {
+    let Ok(window) = window.get_single() else { return; };
+    let Ok((camera, camera_transform)) = camera_query.get_single() else { return; };
     let Ok(&player_transform) = player_query.get_single() else { return; };
-    if input.just_pressed(MouseButton::Left) {
-        for (entity, enemy_transform) in enemy_query.iter() {
-            let distance = player_transform
-                .translation
-                .distance(enemy_transform.translation);
-            if distance < 50. {
-                commands.entity(entity).despawn();
-            }
-        }
+    if input.pressed(MouseButton::Left) {
+        let Some(cursor_position) = window.cursor_position() else { return; };
+        let Some(direction) = camera.viewport_to_world_2d(
+            camera_transform,
+            cursor_position
+        ) else { return; };
+        let position = player_transform.translation + Vec3::new(32., 0., 0.);
+        let diff = direction - position.truncate();
+        commands.spawn((
+            RigidBody::Dynamic,
+            TransformBundle::from(Transform::from_translation(position)),
+            Collider::ball(2.),
+            Bullet::new(diff.normalize()),
+        ));
     }
 }

@@ -1,3 +1,4 @@
+mod bullet;
 mod camera;
 mod enemy;
 mod input;
@@ -26,5 +27,6 @@ fn main() {
         .add_plugin(input::InputPlugin)
         .add_plugin(enemy::EnemyPlugin)
         .add_plugin(map::MapPlugin)
+        .add_plugin(bullet::BulletPlugin)
         .run();
 }

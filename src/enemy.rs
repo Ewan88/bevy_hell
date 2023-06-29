@@ -7,6 +7,12 @@ use rand::Rng;
 #[derive(Component)]
 pub struct Enemy;
 
+impl Enemy {
+    pub fn die(&self, commands: &mut Commands, entity: Entity) {
+        commands.entity(entity).despawn();
+    }
+}
+
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
@@ -87,10 +93,6 @@ fn spawn_enemies(
                         pos_y.clamp(-1000., 1000.),
                         1.,
                     ),
-                    sprite: Sprite {
-                        color: Color::BLACK,
-                        ..Default::default()
-                    },
                     ..Default::default()
                 },
                 Enemy,
@@ -115,8 +117,8 @@ fn enemy_movement(
             player_transform.translation.y - transform.translation.y,
         );
         let direction = direction.normalize();
-        transform.translation.x += direction.x * time.delta_seconds() * 1e2;
-        transform.translation.y += direction.y * time.delta_seconds() * 1e2;
+        transform.translation.x += direction.x * time.delta_seconds() * 100.;
+        transform.translation.y += direction.y * time.delta_seconds() * 100.;
     }
 }
 

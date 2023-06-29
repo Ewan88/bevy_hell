@@ -32,7 +32,7 @@ impl Plugin for PlayerPlugin {
 fn setup_player(mut commands: Commands, icons: Res<Icons>) {
     commands.spawn((
         SpriteBundle {
-            texture: icons.samurai.clone(),
+            texture: icons.old_man.clone(),
             transform: Transform::from_xyz(0., 0., 1.),
             ..Default::default()
         },
