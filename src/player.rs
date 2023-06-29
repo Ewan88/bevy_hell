@@ -28,7 +28,7 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-pub fn setup_player(mut commands: Commands, icons: Res<Icons>) {
+fn setup_player(mut commands: Commands, icons: Res<Icons>) {
     commands.spawn((
         SpriteBundle {
             texture: icons.samurai.clone(),
@@ -39,7 +39,7 @@ pub fn setup_player(mut commands: Commands, icons: Res<Icons>) {
     ));
 }
 
-pub fn kill_player(
+fn kill_player(
     mut commands: Commands,
     mut player_query: Query<(Entity, &Player)>,
 ) {

@@ -30,7 +30,7 @@ impl SpawnTimer {
         let mut rng = rand::thread_rng();
         Self {
             timer: Timer::from_seconds(
-                rng.gen_range(1..5) as f32,
+                rng.gen_range(1..2) as f32,
                 TimerMode::Repeating,
             ),
         }
@@ -71,8 +71,8 @@ fn spawn_enemies(
 
     if timer.timer.finished() {
         let mut rng = rand::thread_rng();
-        let x: f32 = rng.gen_range(-100..100) as f32;
-        let y: f32 = rng.gen_range(-100..100) as f32;
+        let x: f32 = rng.gen_range(-10..10) as f32;
+        let y: f32 = rng.gen_range(-10..10) as f32;
         let spawns: i32 = rng.gen_range(5..10) as i32;
         commands.spawn_batch((0..spawns).map(move |_| {
             (

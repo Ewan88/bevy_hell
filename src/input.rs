@@ -1,11 +1,16 @@
-use crate::{camera::GameCamera, player::Player};
+use crate::{
+    camera::GameCamera,
+    enemy::Enemy,
+    player::Player,
+};
 use bevy::prelude::*;
 
 pub struct InputPlugin;
 
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(keyboard_input_system);
+        app.add_system(keyboard_input_system)
+            .add_system(mouse_input_system);
     }
 }
 
@@ -46,5 +51,24 @@ fn keyboard_input_system(
     if key_pressed(&input, KEY_MAP[3]) {
         player_transform.translation.x += 1. * SPEED;
         camera_transform.translation.x += 1. * SPEED;
+    }
+}
+
+fn mouse_input_system(
+    input: Res<Input<MouseButton>>,
+    player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
+    enemy_query: Query<(Entity, &Transform), (With<Enemy>, Without<Player>)>,
+    mut commands: Commands,
+) {
+    let Ok(&player_transform) = player_query.get_single() else { return; };
+    if input.just_pressed(MouseButton::Left) {
+        for (entity, enemy_transform) in enemy_query.iter() {
+            let distance = player_transform
+                .translation
+                .distance(enemy_transform.translation);
+            if distance < 50. {
+                commands.entity(entity).despawn();
+            }
+        }
     }
 }
