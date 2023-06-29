@@ -72,16 +72,19 @@ fn spawn_enemies(
 
     if timer.timer.finished() {
         let mut rng = rand::thread_rng();
-        let x: f32 = rng.gen_range(-10..10) as f32;
-        let y: f32 = rng.gen_range(-10..10) as f32;
+        let x: f32 = rng.gen_range(-100..100) as f32;
+        let y: f32 = rng.gen_range(-100..100) as f32;
         let spawns: i32 = rng.gen_range(5..10) as i32;
-        commands.spawn_batch((0..spawns).map(move |_| {
+        commands.spawn_batch((0..spawns).map(move |pos| {
+            let pos_x =
+                player_transform.translation.x + 1280. + x + (pos as f32 * 32.);
+            let pos_y = player_transform.translation.y + 720. + y;
             (
                 SpriteBundle {
                     texture: samurai_icon.clone(),
                     transform: Transform::from_xyz(
-                        player_transform.translation.x + 1280. + x,
-                        player_transform.translation.y + 720. + y,
+                        pos_x.clamp(-1000., 1000.),
+                        pos_y.clamp(-1000., 1000.),
                         1.,
                     ),
                     sprite: Sprite {
@@ -92,7 +95,9 @@ fn spawn_enemies(
                 },
                 Enemy,
                 RigidBody::Dynamic,
-                Collider::cuboid(1., 1.),
+                Collider::cuboid(16., 16.),
+                Restitution::coefficient(1.),
+                LockedAxes::ROTATION_LOCKED,
             )
         }));
     }

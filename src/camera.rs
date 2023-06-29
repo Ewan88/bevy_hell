@@ -9,8 +9,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup)
-            .add_system(move_camera);
+        app.add_startup_system(setup).add_system(move_camera);
     }
 }
 
@@ -19,7 +18,10 @@ fn setup(mut commands: Commands) {
 }
 
 fn move_camera(
-    mut camera_query: Query<&mut Transform, (With<GameCamera>, Without<Player>)>,
+    mut camera_query: Query<
+        &mut Transform,
+        (With<GameCamera>, Without<Player>),
+    >,
     player_query: Query<&Transform, (With<Player>, Without<GameCamera>)>,
 ) {
     let Ok(player_transform) = player_query.get_single() else { return; };

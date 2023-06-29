@@ -38,7 +38,9 @@ fn setup_player(mut commands: Commands, icons: Res<Icons>) {
         },
         Player::new(),
         RigidBody::Dynamic,
-        Collider::cuboid(1., 1.),
+        Collider::cuboid(16., 16.),
+        Restitution::coefficient(1.),
+        LockedAxes::ROTATION_LOCKED,
     ));
 }
 
