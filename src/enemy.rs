@@ -92,7 +92,7 @@ fn spawn_enemies(
                 },
                 Enemy,
                 RigidBody::Dynamic,
-                Collider::cuboid(0.5, 0.5),
+                Collider::cuboid(1., 1.),
             )
         }));
     }

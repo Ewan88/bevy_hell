@@ -25,28 +25,19 @@ fn keyboard_input_system(
         &mut Transform,
         (With<Player>, Without<GameCamera>),
     >,
-    mut camera_query: Query<
-        &mut Transform,
-        (With<GameCamera>, Without<Player>),
-    >,
 ) {
     let Ok(mut player_transform) = player_query.get_single_mut() else { return; };
-    let Ok(mut camera_transform) = camera_query.get_single_mut() else { return; };
     if key_pressed(&input, KEY_MAP[0]) {
         player_transform.translation.y += 1. * SPEED;
-        camera_transform.translation.y += 1. * SPEED;
     }
     if key_pressed(&input, KEY_MAP[1]) {
         player_transform.translation.x -= 1. * SPEED;
-        camera_transform.translation.x -= 1. * SPEED;
     }
     if key_pressed(&input, KEY_MAP[2]) {
         player_transform.translation.y -= 1. * SPEED;
-        camera_transform.translation.y -= 1. * SPEED;
     }
     if key_pressed(&input, KEY_MAP[3]) {
         player_transform.translation.x += 1. * SPEED;
-        camera_transform.translation.x += 1. * SPEED;
     }
 }
 

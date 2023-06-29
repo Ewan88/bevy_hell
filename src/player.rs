@@ -38,7 +38,7 @@ fn setup_player(mut commands: Commands, icons: Res<Icons>) {
         },
         Player::new(),
         RigidBody::Dynamic,
-        Collider::cuboid(0.5, 0.5),
+        Collider::cuboid(1., 1.),
     ));
 }
 
