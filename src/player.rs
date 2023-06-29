@@ -1,5 +1,6 @@
 use super::loader::Icons;
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
@@ -36,6 +37,8 @@ fn setup_player(mut commands: Commands, icons: Res<Icons>) {
             ..Default::default()
         },
         Player::new(),
+        RigidBody::Dynamic,
+        Collider::cuboid(0.5, 0.5),
     ));
 }
 

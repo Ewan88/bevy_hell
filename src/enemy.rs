@@ -1,6 +1,7 @@
 use super::loader::Icons;
 use super::player::Player;
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 use rand::Rng;
 
 #[derive(Component)]
@@ -90,6 +91,8 @@ fn spawn_enemies(
                     ..Default::default()
                 },
                 Enemy,
+                RigidBody::Dynamic,
+                Collider::cuboid(0.5, 0.5),
             )
         }));
     }

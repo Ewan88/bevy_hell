@@ -1,8 +1,4 @@
-use crate::{
-    camera::GameCamera,
-    enemy::Enemy,
-    player::Player,
-};
+use crate::{camera::GameCamera, enemy::Enemy, player::Player};
 use bevy::prelude::*;
 
 pub struct InputPlugin;
