@@ -12,7 +12,7 @@ impl Plugin for InputPlugin {
 const KEY_MAP: [KeyCode; 4] =
     [(KeyCode::W), (KeyCode::A), (KeyCode::S), (KeyCode::D)];
 
-const SPEED: f32 = 10.;
+pub const SPEED: f32 = 10.;
 
 fn key_pressed(input: &Res<Input<KeyCode>>, key_code: KeyCode) -> bool {
     input.pressed(key_code)

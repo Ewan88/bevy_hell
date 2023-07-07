@@ -1,5 +1,6 @@
-use super::assets::Icons;
+use super::assets::Images;
 use super::player::Player;
+use super::animation::{AnimationIndices, AnimationTimer};
 use bevy::prelude::*;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
@@ -68,14 +69,24 @@ fn setup_attack_timer(mut commands: Commands) {
 fn spawn_enemies(
     mut commands: Commands,
     player_query: Query<&Transform, With<Player>>,
-    icon: Res<Icons>,
+    icon: Res<Images>,
     mut timer: ResMut<SpawnTimer>,
     time: Res<Time>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     timer.countdown.tick(time.delta());
     let Ok(&player_transform) = player_query.get_single() else { return; };
-    let image = icon.blob.clone();
-
+    let texture_handle = icon.blob.clone();
+    let texture_atlas = TextureAtlas::from_grid(
+        texture_handle,
+        Vec2::new(32., 32.),
+        6,
+        1,
+        None,
+        None,
+    );
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let animation_indices = AnimationIndices { first: 1, last: 5 };
     if timer.countdown.finished() {
         let mut rng = SmallRng::from_entropy();
         let x: f32 = rng.gen_range(-100..100) as f32;
@@ -89,12 +100,18 @@ fn spawn_enemies(
                 + y
                 + rng.gen_range(-60..60) as f32;
             (
-                SpriteBundle {
-                    texture: image.clone(),
+                SpriteSheetBundle {
+                    texture_atlas: texture_atlas_handle.clone(),
+                    sprite: TextureAtlasSprite::new(animation_indices.first),
                     transform: Transform::from_xyz(pos_x, pos_y, 1.),
                     ..Default::default()
                 },
                 Enemy,
+                animation_indices.clone(),
+                AnimationTimer(Timer::from_seconds(
+                    0.1,
+                    TimerMode::Repeating,
+                )),
             )
         }));
     }

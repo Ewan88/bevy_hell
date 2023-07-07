@@ -1,4 +1,4 @@
-use super::assets::Icons;
+use super::assets::Images;
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -28,7 +28,7 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup_player(mut commands: Commands, icons: Res<Icons>) {
+fn setup_player(mut commands: Commands, icons: Res<Images>) {
     commands.spawn((
         SpriteBundle {
             texture: icons.samurai.clone(),

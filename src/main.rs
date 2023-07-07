@@ -5,6 +5,7 @@ mod enemy;
 mod input;
 mod map;
 mod player;
+mod animation;
 
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
@@ -20,5 +21,6 @@ fn main() {
         .add_plugin(enemy::EnemyPlugin)
         .add_plugin(map::MapPlugin)
         .add_plugin(bullet::BulletPlugin)
+        .add_plugin(animation::AnimationPlugin)
         .run();
 }

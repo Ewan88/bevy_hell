@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::player::Player;
+use crate::{player::Player, input};
 
 #[derive(Component)]
 pub struct GameCamera;
@@ -23,8 +23,12 @@ fn move_camera(
         (With<GameCamera>, Without<Player>),
     >,
     player_query: Query<&Transform, (With<Player>, Without<GameCamera>)>,
+    time: Res<Time>,
 ) {
     let Ok(player_transform) = player_query.get_single() else { return; };
     let Ok(mut camera_transform) = camera_query.get_single_mut() else { return; };
-    camera_transform.translation = player_transform.translation;
+    let diffx = player_transform.translation.x - camera_transform.translation.x;
+    let diffy = player_transform.translation.y - camera_transform.translation.y;
+    camera_transform.translation.x += diffx * time.delta_seconds() * input::SPEED;
+    camera_transform.translation.y += diffy * time.delta_seconds() * input::SPEED;
 }
