@@ -3,7 +3,7 @@ use bevy::prelude::*;
 #[derive(Resource)]
 pub struct Icons {
     pub samurai: Handle<Image>,
-    pub old_man: Handle<Image>,
+    pub blob: Handle<Image>,
 }
 
 pub struct AssetLoader;
@@ -16,7 +16,7 @@ impl Plugin for AssetLoader {
 
 fn setup_icons(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(Icons {
-        samurai: asset_server.load("sam.png"),
-        old_man: asset_server.load("old.png"),
+        samurai: asset_server.load("samurai.png"),
+        blob: asset_server.load("blob.png"),
     });
 }

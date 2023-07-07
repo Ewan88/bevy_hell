@@ -1,4 +1,4 @@
-use super::loader::Icons;
+use super::assets::Icons;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -32,7 +32,7 @@ impl Plugin for PlayerPlugin {
 fn setup_player(mut commands: Commands, icons: Res<Icons>) {
     commands.spawn((
         SpriteBundle {
-            texture: icons.old_man.clone(),
+            texture: icons.samurai.clone(),
             transform: Transform::from_xyz(0., 0., 1.),
             ..Default::default()
         },

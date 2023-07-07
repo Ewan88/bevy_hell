@@ -2,7 +2,7 @@ mod bullet;
 mod camera;
 mod enemy;
 mod input;
-mod loader;
+mod assets;
 mod map;
 mod player;
 
@@ -18,10 +18,10 @@ fn main() {
         .add_plugin(WorldInspectorPlugin::new())
         .insert_resource(ClearColor(Color::BISQUE))
         .insert_resource(RapierConfiguration {
-            gravity: Vector2::new(0.0, 0.0).into(),
+            gravity: Vector2::new(0.0, -10.0).into(),
             ..Default::default()
         })
-        .add_plugin(loader::AssetLoader)
+        .add_plugin(assets::AssetLoader)
         .add_plugin(camera::CameraPlugin)
         .add_plugin(player::PlayerPlugin)
         .add_plugin(input::InputPlugin)

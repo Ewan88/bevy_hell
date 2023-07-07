@@ -1,4 +1,4 @@
-use super::loader::Icons;
+use super::assets::Icons;
 use super::player::Player;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -74,7 +74,7 @@ fn spawn_enemies(
 ) {
     timer.timer.tick(time.delta());
     let Ok(&player_transform) = player_query.get_single() else { return; };
-    let samurai_icon = icon.samurai.clone();
+    let samurai_icon = icon.blob.clone();
 
     if timer.timer.finished() {
         let mut rng = rand::thread_rng();
