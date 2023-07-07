@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
 
 const MAP_SIZE: f32 = 1280.;
 
@@ -11,21 +10,4 @@ impl Plugin for MapPlugin {
     }
 }
 
-fn setup_map(mut commands: Commands) {
-    commands.spawn((
-        Collider::cuboid(5.0, MAP_SIZE),
-        TransformBundle::from(Transform::from_xyz(-MAP_SIZE, 0., 0.)),
-    ));
-    commands.spawn((
-        Collider::cuboid(5.0, MAP_SIZE),
-        TransformBundle::from(Transform::from_xyz(MAP_SIZE, 0., 0.)),
-    ));
-    commands.spawn((
-        Collider::cuboid(MAP_SIZE, 5.0),
-        TransformBundle::from(Transform::from_xyz(0., MAP_SIZE, 0.)),
-    ));
-    commands.spawn((
-        Collider::cuboid(MAP_SIZE, 5.0),
-        TransformBundle::from(Transform::from_xyz(0., -MAP_SIZE, 0.)),
-    ));
-}
+fn setup_map(mut commands: Commands) {}
