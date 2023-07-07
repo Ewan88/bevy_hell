@@ -1,7 +1,8 @@
 use super::assets::Icons;
 use super::player::Player;
 use bevy::prelude::*;
-use rand::Rng;
+use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 
 #[derive(Component)]
 pub struct Enemy;
@@ -28,14 +29,14 @@ impl Plugin for EnemyPlugin {
 
 #[derive(Resource)]
 pub struct SpawnTimer {
-    pub timer: Timer,
+    pub countdown: Timer,
 }
 
 impl SpawnTimer {
     pub fn new() -> Self {
-        let mut rng = rand::thread_rng();
+        let mut rng = SmallRng::from_entropy();
         Self {
-            timer: Timer::from_seconds(
+            countdown: Timer::from_seconds(
                 rng.gen_range(1..2) as f32,
                 TimerMode::Repeating,
             ),
@@ -49,13 +50,13 @@ fn setup_spawn_timer(mut commands: Commands) {
 
 #[derive(Resource)]
 pub struct AttackTimer {
-    pub timer: Timer,
+    pub countdown: Timer,
 }
 
 impl AttackTimer {
     pub fn new() -> Self {
         Self {
-            timer: Timer::from_seconds(1., TimerMode::Repeating),
+            countdown: Timer::from_seconds(0.1, TimerMode::Repeating),
         }
     }
 }
@@ -71,27 +72,26 @@ fn spawn_enemies(
     mut timer: ResMut<SpawnTimer>,
     time: Res<Time>,
 ) {
-    timer.timer.tick(time.delta());
+    timer.countdown.tick(time.delta());
     let Ok(&player_transform) = player_query.get_single() else { return; };
-    let samurai_icon = icon.blob.clone();
+    let image = icon.blob.clone();
 
-    if timer.timer.finished() {
-        let mut rng = rand::thread_rng();
+    if timer.countdown.finished() {
+        let mut rng = SmallRng::from_entropy();
         let x: f32 = rng.gen_range(-100..100) as f32;
         let y: f32 = rng.gen_range(-100..100) as f32;
         let spawns: i32 = rng.gen_range(5..10) as i32;
         commands.spawn_batch((0..spawns).map(move |pos| {
             let pos_x =
                 player_transform.translation.x + 1280. + x + (pos as f32 * 32.);
-            let pos_y = player_transform.translation.y + 720. + y;
+            let pos_y = player_transform.translation.y
+                + 720.
+                + y
+                + rng.gen_range(-60..60) as f32;
             (
                 SpriteBundle {
-                    texture: samurai_icon.clone(),
-                    transform: Transform::from_xyz(
-                        pos_x.clamp(-1000., 1000.),
-                        pos_y.clamp(-1000., 1000.),
-                        1.,
-                    ),
+                    texture: image.clone(),
+                    transform: Transform::from_xyz(pos_x, pos_y, 1.),
                     ..Default::default()
                 },
                 Enemy,
@@ -123,7 +123,7 @@ fn enemy_attack(
         (With<Player>, Without<Enemy>),
     >,
     enemy_query: Query<&Transform, (With<Enemy>, Without<Player>)>,
-    mut timer: ResMut<AttackTimer>,
+    mut attack_timer: ResMut<AttackTimer>,
     time: Res<Time>,
 ) {
     let Ok((mut player_struct, player_transform)) = player_query.get_single_mut() else { return; };
@@ -133,9 +133,9 @@ fn enemy_attack(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
         );
-        timer.timer.tick(time.delta());
-        if distance.length() < 32. && timer.timer.finished() {
-            player_struct.recieve_damage(34);
+        attack_timer.countdown.tick(time.delta());
+        if distance.length() < 32. && attack_timer.countdown.finished() {
+            player_struct.recieve_damage(1.2);
         }
     }
 }

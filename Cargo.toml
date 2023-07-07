@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 bevy = "0.10.1"
 bevy-inspector-egui = "0.18.3"
-rand = "0.8.5"
+rand = { version = "0.8.5", features = ["small_rng"] }
