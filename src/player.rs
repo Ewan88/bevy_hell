@@ -21,10 +21,8 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(
-            setup_player.in_base_set(StartupSet::PostStartup),
-        )
-        .add_system(kill_player);
+        app.add_systems(PostStartup, setup_player)
+            .add_systems(Update, kill_player);
     }
 }
 
@@ -39,10 +37,7 @@ fn setup_player(mut commands: Commands, icons: Res<Images>) {
     ));
 }
 
-fn kill_player(
-    mut commands: Commands,
-    mut player_query: Query<(Entity, &Player)>,
-) {
+fn kill_player(mut commands: Commands, mut player_query: Query<(Entity, &Player)>) {
     let Ok((entity, player)) = player_query.get_single_mut() else { return; };
     if player.health <= 0. {
         commands.entity(entity).despawn();

@@ -5,12 +5,11 @@ pub struct InputPlugin;
 
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(keyboard_input_system);
+        app.add_systems(Update, keyboard_input_system);
     }
 }
 
-const KEY_MAP: [KeyCode; 4] =
-    [(KeyCode::W), (KeyCode::A), (KeyCode::S), (KeyCode::D)];
+const KEY_MAP: [KeyCode; 4] = [(KeyCode::W), (KeyCode::A), (KeyCode::S), (KeyCode::D)];
 
 pub const SPEED: f32 = 10.;
 
@@ -20,10 +19,7 @@ fn key_pressed(input: &Res<Input<KeyCode>>, key_code: KeyCode) -> bool {
 
 fn keyboard_input_system(
     input: Res<Input<KeyCode>>,
-    mut player_query: Query<
-        &mut Transform,
-        (With<Player>, Without<GameCamera>),
-    >,
+    mut player_query: Query<&mut Transform, (With<Player>, Without<GameCamera>)>,
 ) {
     let Ok(mut player_transform) = player_query.get_single_mut() else { return; };
     if key_pressed(&input, KEY_MAP[0]) {

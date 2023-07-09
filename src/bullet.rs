@@ -21,9 +21,7 @@ pub struct BulletPlugin;
 
 impl Plugin for BulletPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(bullet_movement)
-            .add_system(bullet_lifetime)
-            .add_system(bullet_collision);
+        app.add_systems(Update, (bullet_movement, bullet_lifetime, bullet_collision));
     }
 }
 
@@ -32,10 +30,8 @@ fn bullet_movement(
     mut bullet_query: Query<(&mut Transform, &Bullet), With<Bullet>>,
 ) {
     for (mut transform, bullet) in bullet_query.iter_mut() {
-        transform.translation.x +=
-            bullet.direction.x * 400. * time.delta_seconds();
-        transform.translation.y +=
-            bullet.direction.y * 400. * time.delta_seconds();
+        transform.translation.x += bullet.direction.x * 400. * time.delta_seconds();
+        transform.translation.y += bullet.direction.y * 400. * time.delta_seconds();
     }
 }
 
@@ -55,10 +51,7 @@ fn bullet_lifetime(
 fn bullet_collision(
     mut commands: Commands,
     mut bullet_query: Query<&Transform, (With<Bullet>, Without<Enemy>)>,
-    mut enemy_query: Query<
-        (Entity, &Enemy, &Transform),
-        (With<Enemy>, Without<Bullet>),
-    >,
+    mut enemy_query: Query<(Entity, &Enemy, &Transform), (With<Enemy>, Without<Bullet>)>,
 ) {
     for bullet_transform in bullet_query.iter_mut() {
         for (entity, enemy, enemy_transform) in enemy_query.iter_mut() {

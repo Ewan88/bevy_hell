@@ -13,13 +13,17 @@ pub struct AnimationPlugin;
 
 impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(animate_sprites);
+        app.add_systems(Update, animate_sprites);
     }
 }
 
 fn animate_sprites(
     time: Res<Time>,
-    mut query: Query<(&mut TextureAtlasSprite, &mut AnimationTimer, &AnimationIndices)>,
+    mut query: Query<(
+        &mut TextureAtlasSprite,
+        &mut AnimationTimer,
+        &AnimationIndices,
+    )>,
 ) {
     for (mut sprite, mut timer, indices) in query.iter_mut() {
         timer.tick(time.delta());

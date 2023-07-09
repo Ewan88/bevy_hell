@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{player::Player, input};
+use crate::{input, player::Player};
 
 #[derive(Component)]
 pub struct GameCamera;
@@ -9,7 +9,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup).add_system(move_camera);
+        app.add_systems(Startup, setup).add_systems(Update, move_camera);
     }
 }
 
@@ -18,10 +18,7 @@ fn setup(mut commands: Commands) {
 }
 
 fn move_camera(
-    mut camera_query: Query<
-        &mut Transform,
-        (With<GameCamera>, Without<Player>),
-    >,
+    mut camera_query: Query<&mut Transform, (With<GameCamera>, Without<Player>)>,
     player_query: Query<&Transform, (With<Player>, Without<GameCamera>)>,
     time: Res<Time>,
 ) {

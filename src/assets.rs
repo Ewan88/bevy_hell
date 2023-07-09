@@ -10,7 +10,7 @@ pub struct AssetLoader;
 
 impl Plugin for AssetLoader {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_images.in_base_set(StartupSet::PreStartup));
+        app.add_systems(PreStartup, setup_images);
     }
 }
 
