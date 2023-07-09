@@ -12,7 +12,9 @@ use bevy::prelude::*;
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins,
+            DefaultPlugins.set(
+                ImagePlugin::default_nearest(),
+            ),
             assets::AssetLoader,
             camera::CameraPlugin,
             player::PlayerPlugin,

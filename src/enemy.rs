@@ -5,6 +5,8 @@ use bevy::prelude::*;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
+const MOVEMENT_SPEED: f32 = 100.;
+
 #[derive(Component)]
 pub struct Enemy;
 
@@ -112,8 +114,8 @@ fn enemy_movement(
             player_transform.translation.y - transform.translation.y,
         );
         let direction = direction.normalize();
-        transform.translation.x += direction.x * time.delta_seconds() * 100.;
-        transform.translation.y += direction.y * time.delta_seconds() * 100.;
+        transform.translation.x += direction.x * time.delta_seconds() * MOVEMENT_SPEED;
+        transform.translation.y += direction.y * time.delta_seconds() * MOVEMENT_SPEED;
     }
 }
 
