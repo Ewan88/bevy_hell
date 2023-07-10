@@ -1,3 +1,5 @@
+use crate::{CollisionSet, MovementSet, SCREEN_HEIGHT, SCREEN_WIDTH};
+
 use super::animation::{AnimationIndices, AnimationTimer};
 use super::assets::Images;
 use super::player::Player;
@@ -6,6 +8,9 @@ use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
 const MOVEMENT_SPEED: f32 = 100.;
+
+#[derive(Component)]
+pub struct Collider;
 
 #[derive(Component)]
 pub struct Enemy;
@@ -20,8 +25,17 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, (setup_spawn_timer, setup_attack_timer))
-            .add_systems(Update, (spawn_enemies, enemy_movement, enemy_attack));
+        app.configure_set(Update, MovementSet.before(CollisionSet))
+            .add_systems(PostStartup, (setup_spawn_timer, setup_attack_timer))
+            .add_systems(
+                Update,
+                (
+                    spawn_enemies,
+                    enemy_movement.in_set(MovementSet),
+                    enemy_collision.in_set(CollisionSet),
+                    enemy_attack.in_set(CollisionSet),
+                ),
+            );
     }
 }
 
@@ -84,9 +98,19 @@ fn spawn_enemies(
         let y: f32 = rng.gen_range(-100..100) as f32;
         let spawns: i32 = rng.gen_range(5..10) as i32;
         commands.spawn_batch((0..spawns).map(move |pos| {
-            let pos_x = player_transform.translation.x + 1280. + x + (pos as f32 * 32.);
-            let pos_y =
-                player_transform.translation.y + 720. + y + rng.gen_range(-60..60) as f32;
+            let mut pos_x = player_transform.translation.x + x + (pos as f32 * 32.);
+            if pos_x < 0. {
+                pos_x += -SCREEN_WIDTH;
+            } else {
+                pos_x += SCREEN_WIDTH;
+            }
+            let mut pos_y =
+                player_transform.translation.y + y + rng.gen_range(-60..60) as f32;
+            if pos_y < 0. {
+                pos_y += -SCREEN_HEIGHT;
+            } else {
+                pos_y += SCREEN_HEIGHT;
+            }
             (
                 SpriteSheetBundle {
                     texture_atlas: texture_atlas_handle.clone(),
@@ -95,6 +119,7 @@ fn spawn_enemies(
                     ..Default::default()
                 },
                 Enemy,
+                Collider,
                 animation_indices.clone(),
                 AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             )
@@ -135,6 +160,24 @@ fn enemy_attack(
         attack_timer.countdown.tick(time.delta());
         if distance.length() < 32. && attack_timer.countdown.finished() {
             player_struct.recieve_damage(1.2);
+        }
+    }
+}
+
+fn enemy_collision(
+    mut enemy_query: Query<&mut Transform, (With<Enemy>, Without<Collider>)>,
+    collider_query: Query<&Transform, (With<Collider>, Without<Enemy>)>,
+) {
+    for collider_transform in collider_query.iter() {
+        for mut enemy_transform in enemy_query.iter_mut() {
+            let distance = Vec2::new(
+                collider_transform.translation.x - enemy_transform.translation.x,
+                collider_transform.translation.y - enemy_transform.translation.y,
+            );
+            if distance.length() < 32. {
+                enemy_transform.translation.x += distance.x;
+                enemy_transform.translation.y += distance.y;
+            }
         }
     }
 }

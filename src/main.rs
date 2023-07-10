@@ -9,12 +9,19 @@ mod player;
 
 use bevy::prelude::*;
 
+pub const SCREEN_WIDTH: f32 = 1280.;
+pub const SCREEN_HEIGHT: f32 = 720.;
+
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+pub struct MovementSet;
+
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CollisionSet;
+
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins.set(
-                ImagePlugin::default_nearest(),
-            ),
+            DefaultPlugins.set(ImagePlugin::default_nearest()),
             assets::AssetLoader,
             camera::CameraPlugin,
             player::PlayerPlugin,

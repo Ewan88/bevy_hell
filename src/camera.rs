@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{input, player::Player};
+use crate::player::Player;
 
 #[derive(Component)]
 pub struct GameCamera;
@@ -21,13 +21,13 @@ fn setup(mut commands: Commands) {
 fn move_camera(
     mut camera_query: Query<&mut Transform, (With<GameCamera>, Without<Player>)>,
     player_query: Query<&Transform, (With<Player>, Without<GameCamera>)>,
-    time: Res<Time>,
 ) {
     let Ok(player_transform) = player_query.get_single() else { return; };
     let Ok(mut camera_transform) = camera_query.get_single_mut() else { return; };
 
-    camera_transform.translation = camera_transform.translation.truncate().lerp(
-        player_transform.translation.truncate(),
-        0.1,
-    ).extend(999.);
+    camera_transform.translation = camera_transform
+        .translation
+        .truncate()
+        .lerp(player_transform.translation.truncate(), 1.)
+        .extend(999.);
 }
