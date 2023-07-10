@@ -3,14 +3,12 @@ use crate::{CollisionSet, MovementSet, SCREEN_HEIGHT, SCREEN_WIDTH};
 use super::animation::{AnimationIndices, AnimationTimer};
 use super::assets::Images;
 use super::player::Player;
+use bevy::ecs::query::QueryCombinationIter;
 use bevy::prelude::*;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
 const MOVEMENT_SPEED: f32 = 100.;
-
-#[derive(Component)]
-pub struct Collider;
 
 #[derive(Component)]
 pub struct Enemy;
@@ -34,6 +32,7 @@ impl Plugin for EnemyPlugin {
                     enemy_movement.in_set(MovementSet),
                     enemy_collision.in_set(CollisionSet),
                     enemy_attack.in_set(CollisionSet),
+                    despawn_enemies,
                 ),
             );
     }
@@ -111,15 +110,15 @@ fn spawn_enemies(
             } else {
                 pos_y += SCREEN_HEIGHT;
             }
+            let transform = Transform::from_xyz(pos_x, pos_y, 1.);
             (
                 SpriteSheetBundle {
                     texture_atlas: texture_atlas_handle.clone(),
                     sprite: TextureAtlasSprite::new(animation_indices.first),
-                    transform: Transform::from_xyz(pos_x, pos_y, 1.),
+                    transform,
                     ..Default::default()
                 },
                 Enemy,
-                Collider,
                 animation_indices.clone(),
                 AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             )
@@ -128,12 +127,12 @@ fn spawn_enemies(
 }
 
 fn enemy_movement(
-    mut enemy_query: Query<(&mut Transform, &Enemy), Without<Player>>,
+    mut enemy_query: Query<&mut Transform, (With<Enemy>, Without<Player>)>,
     player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
     time: Res<Time>,
 ) {
     let Ok(player_transform) = player_query.get_single() else { return; };
-    for (mut transform, _enemy) in enemy_query.iter_mut() {
+    for mut transform in enemy_query.iter_mut() {
         let direction = Vec2::new(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
@@ -165,19 +164,37 @@ fn enemy_attack(
 }
 
 fn enemy_collision(
-    mut enemy_query: Query<&mut Transform, (With<Enemy>, Without<Collider>)>,
-    collider_query: Query<&Transform, (With<Collider>, Without<Enemy>)>,
+    mut transform_query: Query<&mut Transform, With<Enemy>>,
 ) {
-    for collider_transform in collider_query.iter() {
-        for mut enemy_transform in enemy_query.iter_mut() {
-            let distance = Vec2::new(
-                collider_transform.translation.x - enemy_transform.translation.x,
-                collider_transform.translation.y - enemy_transform.translation.y,
-            );
-            if distance.length() < 32. {
-                enemy_transform.translation.x += distance.x;
-                enemy_transform.translation.y += distance.y;
-            }
+    let mut transforms: QueryCombinationIter<'_, '_, &mut Transform, With<Enemy>, 2> = transform_query.iter_combinations_mut();
+    while let Some([mut transform1, mut transform2]) = transforms.fetch_next() {
+        let distance = Vec2::new(
+            transform1.translation.x - transform2.translation.x,
+            transform1.translation.y - transform2.translation.y,
+        );
+        if distance.length() < 32. {
+            let direction = distance.normalize();
+            transform1.translation.x += direction.x * 2.;
+            transform1.translation.y += direction.y * 2.;
+            transform2.translation.x -= direction.x * 2.;
+            transform2.translation.y -= direction.y * 2.;
+        }
+    }
+}
+
+fn despawn_enemies(
+    mut commands: Commands,
+    enemy_query: Query<(&Transform, Entity), With<Enemy>>,
+    player_query: Query<&Transform, With<Player>>,
+) {
+    let Ok(player_transform) = player_query.get_single() else { return; };
+    for (transform, entity) in enemy_query.iter() {
+        let distance = Vec2::new(
+            player_transform.translation.x - transform.translation.x,
+            player_transform.translation.y - transform.translation.y,
+        );
+        if distance.length() > 2000. {
+            commands.entity(entity).despawn();
         }
     }
 }
