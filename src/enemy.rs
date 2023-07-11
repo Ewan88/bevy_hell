@@ -32,7 +32,7 @@ impl Plugin for EnemyPlugin {
                     enemy_movement.in_set(MovementSet),
                     enemy_collision.in_set(CollisionSet),
                     enemy_attack.in_set(CollisionSet),
-                    despawn_enemies,
+                    // despawn_enemies,
                 ),
             );
     }
@@ -79,11 +79,16 @@ fn setup_attack_timer(mut commands: Commands) {
 fn spawn_enemies(
     mut commands: Commands,
     player_query: Query<&Transform, With<Player>>,
+    enemy_query: Query<&Enemy>,
     icon: Res<Images>,
     mut timer: ResMut<SpawnTimer>,
     time: Res<Time>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
+    let enemy_count = enemy_query.iter().count();
+    if enemy_count > 1000 {
+        return;
+    }
     timer.countdown.tick(time.delta());
     let Ok(&player_transform) = player_query.get_single() else { return; };
     let texture_handle = icon.blob.clone();
@@ -163,10 +168,9 @@ fn enemy_attack(
     }
 }
 
-fn enemy_collision(
-    mut transform_query: Query<&mut Transform, With<Enemy>>,
-) {
-    let mut transforms: QueryCombinationIter<'_, '_, &mut Transform, With<Enemy>, 2> = transform_query.iter_combinations_mut();
+fn enemy_collision(mut transform_query: Query<&mut Transform, With<Enemy>>) {
+    let mut transforms: QueryCombinationIter<'_, '_, &mut Transform, With<Enemy>, 2> =
+        transform_query.iter_combinations_mut();
     while let Some([mut transform1, mut transform2]) = transforms.fetch_next() {
         let distance = Vec2::new(
             transform1.translation.x - transform2.translation.x,

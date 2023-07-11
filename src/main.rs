@@ -1,5 +1,6 @@
 mod animation;
 mod assets;
+mod attacks;
 mod bullet;
 mod camera;
 mod enemy;
@@ -28,7 +29,7 @@ fn main() {
             input::InputPlugin,
             enemy::EnemyPlugin,
             map::MapPlugin,
-            bullet::BulletPlugin,
+            attacks::AttackPlugin,
             animation::AnimationPlugin,
         ))
         .run();
