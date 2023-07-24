@@ -1,8 +1,9 @@
 use crate::{CollisionSet, MovementSet, SCREEN_HEIGHT, SCREEN_WIDTH};
 
 use super::animation::{AnimationIndices, AnimationTimer};
-use super::assets::Images;
-use super::player::Player;
+use super::assets::*;
+use super::player::*;
+use bevy::audio::Volume;
 use bevy::ecs::query::QueryCombinationIter;
 use bevy::prelude::*;
 use rand::rngs::SmallRng;
@@ -32,7 +33,7 @@ impl Plugin for EnemyPlugin {
                     enemy_movement.in_set(MovementSet),
                     enemy_collision.in_set(CollisionSet),
                     enemy_attack.in_set(CollisionSet),
-                    // despawn_enemies,
+                    despawn_enemies,
                 ),
             );
     }
@@ -48,7 +49,7 @@ impl SpawnTimer {
         let mut rng = SmallRng::from_entropy();
         Self {
             countdown: Timer::from_seconds(
-                rng.gen_range(1..2) as f32,
+                rng.gen_range((0.5)..(2.)),
                 TimerMode::Repeating,
             ),
         }
@@ -100,7 +101,7 @@ fn spawn_enemies(
         let mut rng = SmallRng::from_entropy();
         let x: f32 = rng.gen_range(-100..100) as f32;
         let y: f32 = rng.gen_range(-100..100) as f32;
-        let spawns: i32 = rng.gen_range(5..10) as i32;
+        let spawns: i32 = rng.gen_range(5..12) as i32;
         commands.spawn_batch((0..spawns).map(move |pos| {
             let mut pos_x = player_transform.translation.x + x + (pos as f32 * 32.);
             if pos_x < 0. {
@@ -116,6 +117,7 @@ fn spawn_enemies(
                 pos_y += SCREEN_HEIGHT;
             }
             let transform = Transform::from_xyz(pos_x, pos_y, 1.);
+            // println!("{} {}", pos_x, pos_y);
             (
                 SpriteSheetBundle {
                     texture_atlas: texture_atlas_handle.clone(),
@@ -149,9 +151,12 @@ fn enemy_movement(
 }
 
 fn enemy_attack(
+    mut commands: Commands,
+    audio: Res<Audio>,
     mut player_query: Query<(&mut Player, &Transform), (With<Player>, Without<Enemy>)>,
     enemy_query: Query<&Transform, (With<Enemy>, Without<Player>)>,
     mut attack_timer: ResMut<AttackTimer>,
+    damage_query: Query<&HealthDown>,
     time: Res<Time>,
 ) {
     let Ok((mut player_struct, player_transform)) = player_query.get_single_mut() else { return; };
@@ -161,9 +166,21 @@ fn enemy_attack(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
         );
+
         attack_timer.countdown.tick(time.delta());
+
         if distance.length() < 32. && attack_timer.countdown.finished() {
-            player_struct.recieve_damage(1.2);
+            if damage_query.is_empty() {
+                commands.spawn((
+                    AudioBundle {
+                        source: audio.health_down.clone(),
+                        settings: PlaybackSettings::DESPAWN
+                            .with_volume(Volume::new_relative(1.)),
+                    },
+                    HealthDown,
+                ));
+            }
+            player_struct.receive_damage();
         }
     }
 }
@@ -176,7 +193,7 @@ fn enemy_collision(mut transform_query: Query<&mut Transform, With<Enemy>>) {
             transform1.translation.x - transform2.translation.x,
             transform1.translation.y - transform2.translation.y,
         );
-        if distance.length() < 32. {
+        if distance.length() <= 32. {
             let direction = distance.normalize();
             transform1.translation.x += direction.x * 2.;
             transform1.translation.y += direction.y * 2.;
@@ -197,7 +214,8 @@ fn despawn_enemies(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
         );
-        if distance.length() > 2000. {
+        if distance.length() > 4000. || distance.length() < -4000. {
+            println!("Despawning enemy {:?} at {:?}", entity, transform);
             commands.entity(entity).despawn();
         }
     }

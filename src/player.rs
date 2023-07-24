@@ -1,4 +1,5 @@
-use super::assets::Images;
+use crate::assets::*;
+
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -11,9 +12,9 @@ impl Player {
         Self { health: 100. }
     }
 
-    pub fn recieve_damage(&mut self, damage: f32) {
-        self.health -= damage;
-        println!("Player health: {}", self.health)
+    pub fn receive_damage(&mut self) {
+        self.health -= 1.2;
+        println!("Player health: {}", self.health);
     }
 }
 

@@ -55,7 +55,11 @@ fn spawn_attacks(
         commands.spawn((
             SpriteBundle {
                 texture: texture_handle,
-                transform: Transform::from_translation(player_transform.translation),
+                transform: Transform::from_xyz(
+                    player_transform.translation.x + 32.,
+                    player_transform.translation.y,
+                    0.0,
+                ),
                 ..Default::default()
             },
             Attack::new(),
