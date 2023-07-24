@@ -8,6 +8,7 @@ pub struct Bullet {
     pub lifetime: Timer,
 }
 
+#[allow(dead_code)]
 impl Bullet {
     pub fn new(direction: Vec2) -> Self {
         Self {
@@ -48,6 +49,7 @@ fn bullet_lifetime(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn bullet_collision(
     mut commands: Commands,
     mut bullet_query: Query<&Transform, (With<Bullet>, Without<Enemy>)>,
