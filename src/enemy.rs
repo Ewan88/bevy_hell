@@ -48,10 +48,7 @@ impl SpawnTimer {
     pub fn new() -> Self {
         let mut rng = SmallRng::from_entropy();
         Self {
-            countdown: Timer::from_seconds(
-                rng.gen_range((0.5)..(2.)),
-                TimerMode::Repeating,
-            ),
+            countdown: Timer::from_seconds(rng.gen_range(0.5..2.), TimerMode::Repeating),
         }
     }
 }
@@ -101,7 +98,7 @@ fn spawn_enemies(
         let mut rng = SmallRng::from_entropy();
         let x: f32 = rng.gen_range(-100..100) as f32;
         let y: f32 = rng.gen_range(-100..100) as f32;
-        let spawns: i32 = rng.gen_range(5..12) as i32;
+        let spawns: i32 = rng.gen_range(5..12);
         commands.spawn_batch((0..spawns).map(move |pos| {
             let mut pos_x = player_transform.translation.x + x + (pos as f32 * 32.);
             if pos_x < 0. {
@@ -150,13 +147,14 @@ fn enemy_movement(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn enemy_attack(
     mut commands: Commands,
     audio: Res<Audio>,
     mut player_query: Query<(&mut Player, &Transform), (With<Player>, Without<Enemy>)>,
     enemy_query: Query<&Transform, (With<Enemy>, Without<Player>)>,
     mut attack_timer: ResMut<AttackTimer>,
-    damage_query: Query<&HealthDown>,
+    audio_query: Query<&PlayerHitSound>,
     time: Res<Time>,
 ) {
     let Ok((mut player_struct, player_transform)) = player_query.get_single_mut() else { return; };
@@ -170,17 +168,20 @@ fn enemy_attack(
         attack_timer.countdown.tick(time.delta());
 
         if distance.length() < 32. && attack_timer.countdown.finished() {
-            if damage_query.is_empty() {
+            if audio_query.is_empty() {
                 commands.spawn((
                     AudioBundle {
                         source: audio.health_down.clone(),
-                        settings: PlaybackSettings::DESPAWN
+                        settings: PlaybackSettings::ONCE
                             .with_volume(Volume::new_relative(1.)),
                     },
-                    HealthDown,
+                    PlayerHitSound {
+                        timer: Timer::from_seconds(5., TimerMode::Once),
+                    },
                 ));
             }
             player_struct.receive_damage();
+            player_struct.last_damage = time.elapsed_seconds_f64();
         }
     }
 }

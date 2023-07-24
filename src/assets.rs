@@ -13,7 +13,9 @@ pub struct Audio {
 }
 
 #[derive(Component)]
-pub struct HealthDown;
+pub struct PlayerHitSound {
+    pub timer: Timer,
+}
 
 pub struct AssetLoader;
 
