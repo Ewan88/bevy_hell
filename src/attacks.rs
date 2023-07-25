@@ -1,6 +1,6 @@
-use bevy::prelude::*;
+use bevy::{audio::Volume, prelude::*};
 
-use crate::{assets::Images, enemy::Enemy, player::Player};
+use crate::{assets::{Images, Audio}, enemy::Enemy, player::Player};
 
 #[derive(Component)]
 pub struct Attack {
@@ -45,6 +45,7 @@ fn spawn_attacks(
     mut commands: Commands,
     player_query: Query<&Transform, With<Player>>,
     icon: Res<Images>,
+    audio: Res<Audio>,
     mut timer: ResMut<SpawnTimer>,
     time: Res<Time>,
 ) {
@@ -63,6 +64,10 @@ fn spawn_attacks(
                 ..Default::default()
             },
             Attack::new(),
+            AudioBundle {
+                source: audio.slash_attack.clone(),
+                settings: PlaybackSettings::ONCE.with_volume(Volume::new_relative(1.)),
+            },
         ));
     }
 }
