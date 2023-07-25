@@ -19,6 +19,9 @@ pub struct MovementSet;
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CollisionSet;
 
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+pub struct DespawnSet;
+
 fn main() {
     App::new()
         .add_plugins((
@@ -32,5 +35,7 @@ fn main() {
             attacks::AttackPlugin,
             animation::AnimationPlugin,
         ))
+        .configure_set(Update, MovementSet.before(CollisionSet))
+        .configure_set(Update, DespawnSet.after(CollisionSet))
         .run();
 }

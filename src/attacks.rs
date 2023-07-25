@@ -1,6 +1,11 @@
 use bevy::{audio::Volume, prelude::*};
 
-use crate::{assets::{Images, Audio}, enemy::Enemy, player::Player};
+use crate::{
+    assets::{Audio, Images},
+    enemy::Enemy,
+    player::Player,
+    CollisionSet, DespawnSet,
+};
 
 #[derive(Component)]
 pub struct Attack {
@@ -19,8 +24,14 @@ pub struct AttackPlugin;
 
 impl Plugin for AttackPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, setup_spawn_timer)
-            .add_systems(Update, (spawn_attacks, attack_lifetime, attack_collision));
+        app.add_systems(PostStartup, setup_spawn_timer).add_systems(
+            Update,
+            (
+                spawn_attacks,
+                attack_lifetime.in_set(DespawnSet),
+                attack_collision.in_set(CollisionSet),
+            ),
+        );
     }
 }
 
@@ -57,7 +68,7 @@ fn spawn_attacks(
             SpriteBundle {
                 texture: texture_handle,
                 transform: Transform::from_xyz(
-                    player_transform.translation.x + 32.,
+                    player_transform.translation.x + 50.,
                     player_transform.translation.y,
                     0.0,
                 ),
@@ -87,18 +98,19 @@ fn attack_lifetime(
 
 #[allow(clippy::type_complexity)]
 fn attack_collision(
-    mut commands: Commands,
     mut attack_query: Query<&Transform, (With<Attack>, Without<Enemy>)>,
-    mut enemy_query: Query<(Entity, &Enemy, &Transform), (With<Enemy>, Without<Attack>)>,
+    mut enemy_query: Query<(&mut Enemy, &Transform), (With<Enemy>, Without<Attack>)>,
+    time: Res<Time>,
 ) {
     for attack_transform in attack_query.iter_mut() {
-        for (entity, enemy, enemy_transform) in enemy_query.iter_mut() {
+        for (mut enemy, enemy_transform) in enemy_query.iter_mut() {
             if attack_transform
                 .translation
                 .distance(enemy_transform.translation)
                 < 50.
             {
-                enemy.die(&mut commands, entity);
+                enemy.receive_damage(10.);
+                enemy.last_damage = time.elapsed_seconds_f64();
             }
         }
     }

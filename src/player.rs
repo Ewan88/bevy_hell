@@ -29,8 +29,10 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, setup_player)
-            .add_systems(Update, (kill_player, damage_audio_cooldown));
+        app.add_systems(PostStartup, setup_player).add_systems(
+            Update,
+            (kill_player, damage_audio_cooldown, color_change_cooldown),
+        );
     }
 }
 
@@ -61,6 +63,10 @@ fn damage_audio_cooldown(
     let Ok((entity, mut sound)) = sound_query.get_single_mut() else { return; };
     let Ok(mut player) = player_query.get_single_mut() else { return; };
 
+    if !player.recent_damage {
+        return;
+    }
+
     let diff = player.last_damage - time.elapsed_seconds_f64();
 
     if diff < 1. {
@@ -71,5 +77,24 @@ fn damage_audio_cooldown(
         println!("Sound timer finished");
         player.recent_damage = false;
         commands.entity(entity).despawn();
+    }
+}
+
+fn color_change_cooldown(
+    mut player_query: Query<(&Player, &mut Sprite), With<Player>>,
+    time: Res<Time>,
+) {
+    let Ok((player, mut sprite)) = player_query.get_single_mut() else { return; };
+
+    if !player.recent_damage {
+        return;
+    }
+
+    let diff = player.last_damage - time.elapsed_seconds_f64();
+
+    if diff < -0.1 {
+        sprite.color = Color::default();
+    } else {
+        sprite.color = Color::RED;
     }
 }

@@ -51,18 +51,17 @@ fn bullet_lifetime(
 
 #[allow(clippy::type_complexity)]
 fn bullet_collision(
-    mut commands: Commands,
     mut bullet_query: Query<&Transform, (With<Bullet>, Without<Enemy>)>,
-    mut enemy_query: Query<(Entity, &Enemy, &Transform), (With<Enemy>, Without<Bullet>)>,
+    mut enemy_query: Query<(&mut Enemy, &Transform), (With<Enemy>, Without<Bullet>)>,
 ) {
     for bullet_transform in bullet_query.iter_mut() {
-        for (entity, enemy, enemy_transform) in enemy_query.iter_mut() {
+        for (mut enemy, enemy_transform) in enemy_query.iter_mut() {
             if bullet_transform
                 .translation
                 .distance(enemy_transform.translation)
                 < 32.
             {
-                enemy.die(&mut commands, entity);
+                enemy.receive_damage(10.);
             }
         }
     }

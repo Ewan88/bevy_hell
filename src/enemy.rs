@@ -1,4 +1,4 @@
-use crate::{CollisionSet, MovementSet, SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::{CollisionSet, DespawnSet, MovementSet, SCREEN_HEIGHT, SCREEN_WIDTH};
 
 use super::animation::{AnimationIndices, AnimationTimer};
 use super::assets::*;
@@ -12,11 +12,14 @@ use rand::{Rng, SeedableRng};
 const MOVEMENT_SPEED: f32 = 100.;
 
 #[derive(Component)]
-pub struct Enemy;
+pub struct Enemy {
+    pub health: f32,
+    pub last_damage: f64,
+}
 
 impl Enemy {
-    pub fn die(&self, commands: &mut Commands, entity: Entity) {
-        commands.entity(entity).despawn();
+    pub fn receive_damage(&mut self, damage: f32) {
+        self.health -= damage;
     }
 }
 
@@ -24,8 +27,7 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.configure_set(Update, MovementSet.before(CollisionSet))
-            .add_systems(PostStartup, (setup_spawn_timer, setup_attack_timer))
+        app.add_systems(PostStartup, (setup_spawn_timer, setup_attack_timer))
             .add_systems(
                 Update,
                 (
@@ -33,7 +35,8 @@ impl Plugin for EnemyPlugin {
                     enemy_movement.in_set(MovementSet),
                     enemy_collision.in_set(CollisionSet),
                     enemy_attack.in_set(CollisionSet),
-                    despawn_enemies,
+                    color_change_cooldown,
+                    despawn_enemies.in_set(DespawnSet),
                 ),
             );
     }
@@ -122,7 +125,10 @@ fn spawn_enemies(
                     transform,
                     ..Default::default()
                 },
-                Enemy,
+                Enemy {
+                    health: 10.,
+                    last_damage: 0.,
+                },
                 animation_indices.clone(),
                 AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             )
@@ -131,12 +137,16 @@ fn spawn_enemies(
 }
 
 fn enemy_movement(
-    mut enemy_query: Query<&mut Transform, (With<Enemy>, Without<Player>)>,
+    mut enemy_query: Query<(&mut Transform, &mut Enemy), (With<Enemy>, Without<Player>)>,
     player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
     time: Res<Time>,
 ) {
     let Ok(player_transform) = player_query.get_single() else { return; };
-    for mut transform in enemy_query.iter_mut() {
+    for (mut transform, enemy) in enemy_query.iter_mut() {
+        let diff = enemy.last_damage - time.elapsed_seconds_f64();
+        if diff > -0.2 {
+            continue;
+        }
         let direction = Vec2::new(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
@@ -206,18 +216,37 @@ fn enemy_collision(mut transform_query: Query<&mut Transform, With<Enemy>>) {
 
 fn despawn_enemies(
     mut commands: Commands,
-    enemy_query: Query<(&Transform, Entity), With<Enemy>>,
+    enemy_query: Query<(&Transform, Entity, &Enemy), With<Enemy>>,
     player_query: Query<&Transform, With<Player>>,
+    time: Res<Time>,
 ) {
     let Ok(player_transform) = player_query.get_single() else { return; };
-    for (transform, entity) in enemy_query.iter() {
+    for (transform, entity, enemy) in enemy_query.iter() {
         let distance = Vec2::new(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
         );
         if distance.length() > 4000. || distance.length() < -4000. {
-            println!("Despawning enemy {:?} at {:?}", entity, transform);
             commands.entity(entity).despawn();
+        } else if enemy.health <= 0. {
+            let diff = enemy.last_damage - time.elapsed_seconds_f64();
+            if diff < -0.5 {
+                commands.entity(entity).despawn();
+            }
+        }
+    }
+}
+
+fn color_change_cooldown(
+    mut enemy_query: Query<(&Enemy, &mut TextureAtlasSprite), With<Enemy>>,
+    time: Res<Time>,
+) {
+    for (enemy, mut sprite) in enemy_query.iter_mut() {
+        let diff = enemy.last_damage - time.elapsed_seconds_f64();
+        if diff > -0.2 {
+            sprite.color = Color::GRAY;
+        } else if diff < -0.2 {
+            sprite.color = Color::default();
         }
     }
 }
