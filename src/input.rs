@@ -1,7 +1,5 @@
-use crate::{camera::GameCamera, player::Player};
+use crate::{camera::GameCamera, player::Player, BASE_MOVE_SPEED};
 use bevy::prelude::*;
-
-pub const MOVEMENT_SPEED: f32 = 100.;
 
 pub struct InputPlugin;
 
@@ -24,15 +22,15 @@ fn keyboard_input_system(
 ) {
     let Ok(mut player_transform) = player_query.get_single_mut() else { return; };
     if key_pressed(&input, KEY_MAP[0]) {
-        player_transform.translation.y += 1. * MOVEMENT_SPEED * time.delta_seconds();
+        player_transform.translation.y += 1. * BASE_MOVE_SPEED * time.delta_seconds();
     }
     if key_pressed(&input, KEY_MAP[1]) {
-        player_transform.translation.x -= 1. * MOVEMENT_SPEED * time.delta_seconds();
+        player_transform.translation.x -= 1. * BASE_MOVE_SPEED * time.delta_seconds();
     }
     if key_pressed(&input, KEY_MAP[2]) {
-        player_transform.translation.y -= 1. * MOVEMENT_SPEED * time.delta_seconds();
+        player_transform.translation.y -= 1. * BASE_MOVE_SPEED * time.delta_seconds();
     }
     if key_pressed(&input, KEY_MAP[3]) {
-        player_transform.translation.x += 1. * MOVEMENT_SPEED * time.delta_seconds();
+        player_transform.translation.x += 1. * BASE_MOVE_SPEED * time.delta_seconds();
     }
 }

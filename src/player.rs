@@ -7,6 +7,7 @@ pub struct Player {
     pub health: f32,
     pub recent_damage: bool,
     pub last_damage: f64,
+    pub direction: Vec2,
 }
 
 impl Player {
@@ -15,6 +16,7 @@ impl Player {
             health: 100.,
             recent_damage: false,
             last_damage: 0.,
+            direction: Vec2::ZERO,
         }
     }
 

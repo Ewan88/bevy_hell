@@ -1,4 +1,9 @@
-use crate::{CollisionSet, DespawnSet, MovementSet, SCREEN_HEIGHT, SCREEN_WIDTH};
+use std::f32::consts::PI;
+
+use crate::{
+    CollisionSet, DespawnSet, MovementSet, AUDIO_VOLUME, BASE_MOVE_SPEED, SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+};
 
 use super::animation::{AnimationIndices, AnimationTimer};
 use super::assets::*;
@@ -8,8 +13,6 @@ use bevy::ecs::query::QueryCombinationIter;
 use bevy::prelude::*;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
-
-const MOVEMENT_SPEED: f32 = 100.;
 
 #[derive(Component)]
 pub struct Enemy {
@@ -33,7 +36,7 @@ impl Plugin for EnemyPlugin {
                 (
                     spawn_enemies,
                     enemy_movement.in_set(MovementSet),
-                    enemy_collision.in_set(CollisionSet),
+                    //enemy_collision.in_set(CollisionSet),
                     enemy_attack.in_set(CollisionSet),
                     color_change_cooldown,
                     despawn_enemies.in_set(DespawnSet),
@@ -87,9 +90,10 @@ fn spawn_enemies(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     let enemy_count = enemy_query.iter().count();
-    if enemy_count > 1000 {
+    if enemy_count > 10000 {
         return;
     }
+
     timer.countdown.tick(time.delta());
     let Ok(&player_transform) = player_query.get_single() else { return; };
     let texture_handle = icon.blob.clone();
@@ -97,27 +101,19 @@ fn spawn_enemies(
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 32.), 6, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     let animation_indices = AnimationIndices { first: 1, last: 5 };
+
     if timer.countdown.finished() {
         let mut rng = SmallRng::from_entropy();
-        let x: f32 = rng.gen_range(-100..100) as f32;
-        let y: f32 = rng.gen_range(-100..100) as f32;
-        let spawns: i32 = rng.gen_range(5..12);
-        commands.spawn_batch((0..spawns).map(move |pos| {
-            let mut pos_x = player_transform.translation.x + x + (pos as f32 * 32.);
-            if pos_x < 0. {
-                pos_x += -SCREEN_WIDTH;
-            } else {
-                pos_x += SCREEN_WIDTH;
-            }
-            let mut pos_y =
-                player_transform.translation.y + y + rng.gen_range(-60..60) as f32;
-            if pos_y < 0. {
-                pos_y += -SCREEN_HEIGHT;
-            } else {
-                pos_y += SCREEN_HEIGHT;
-            }
-            let transform = Transform::from_xyz(pos_x, pos_y, 1.);
-            // println!("{} {}", pos_x, pos_y);
+        let spawns: i32 = rng.gen_range(5..10);
+        let x_start = player_transform.translation.x;
+        let y_start = player_transform.translation.y;
+
+        commands.spawn_batch((0..spawns).map(move |_| {
+            let (x_offset, y_offset) =
+                random_point_within_radius(&mut rng, 1000., x_start, y_start);
+            let transform =
+                Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.);
+
             (
                 SpriteSheetBundle {
                     texture_atlas: texture_atlas_handle.clone(),
@@ -136,24 +132,41 @@ fn spawn_enemies(
     }
 }
 
+fn random_point_within_radius(
+    rng: &mut SmallRng,
+    radius: f32,
+    player_x: f32,
+    player_y: f32,
+) -> (f32, f32) {
+    let angle = rng.gen_range(0.0..PI * 2.0);
+    let distance = rng.gen_range(0.0..radius);
+    let x = player_x + distance * angle.cos();
+    let y = player_y + distance * angle.sin();
+    println!("x: {}, y: {}", x, y);
+    (x, y)
+}
+
 fn enemy_movement(
     mut enemy_query: Query<(&mut Transform, &mut Enemy), (With<Enemy>, Without<Player>)>,
     player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
     time: Res<Time>,
 ) {
     let Ok(player_transform) = player_query.get_single() else { return; };
+
     for (mut transform, enemy) in enemy_query.iter_mut() {
         let diff = enemy.last_damage - time.elapsed_seconds_f64();
         if diff > -0.2 {
             continue;
         }
+
         let direction = Vec2::new(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
         );
         let direction = direction.normalize();
-        transform.translation.x += direction.x * time.delta_seconds() * MOVEMENT_SPEED;
-        transform.translation.y += direction.y * time.delta_seconds() * MOVEMENT_SPEED;
+
+        transform.translation.x += direction.x * time.delta_seconds() * BASE_MOVE_SPEED;
+        transform.translation.y += direction.y * time.delta_seconds() * BASE_MOVE_SPEED;
     }
 }
 
@@ -183,7 +196,7 @@ fn enemy_attack(
                     AudioBundle {
                         source: audio.health_down.clone(),
                         settings: PlaybackSettings::ONCE
-                            .with_volume(Volume::new_relative(1.)),
+                            .with_volume(Volume::new_relative(AUDIO_VOLUME)),
                     },
                     PlayerHitSound {
                         timer: Timer::from_seconds(5., TimerMode::Once),
@@ -227,6 +240,7 @@ fn despawn_enemies(
             player_transform.translation.y - transform.translation.y,
         );
         if distance.length() > 4000. || distance.length() < -4000. {
+            println!("despawning out of bounds enemy");
             commands.entity(entity).despawn();
         } else if enemy.health <= 0. {
             let diff = enemy.last_damage - time.elapsed_seconds_f64();

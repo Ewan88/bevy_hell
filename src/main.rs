@@ -12,6 +12,9 @@ use bevy::prelude::*;
 
 pub const SCREEN_WIDTH: f32 = 1280.;
 pub const SCREEN_HEIGHT: f32 = 720.;
+pub const AUDIO_VOLUME: f32 = 0.5;
+
+pub const BASE_MOVE_SPEED: f32 = 100.;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MovementSet;
@@ -35,6 +38,7 @@ fn main() {
             attacks::AttackPlugin,
             animation::AnimationPlugin,
         ))
+        .insert_resource(ClearColor(Color::rgb(0.4, 0.3, 0.6)))
         .configure_set(Update, MovementSet.before(CollisionSet))
         .configure_set(Update, DespawnSet.after(CollisionSet))
         .run();

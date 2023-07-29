@@ -4,7 +4,7 @@ use crate::{
     assets::{Audio, Images},
     enemy::Enemy,
     player::Player,
-    CollisionSet, DespawnSet,
+    CollisionSet, DespawnSet, AUDIO_VOLUME,
 };
 
 #[derive(Component)]
@@ -77,7 +77,8 @@ fn spawn_attacks(
             Attack::new(),
             AudioBundle {
                 source: audio.slash_attack.clone(),
-                settings: PlaybackSettings::ONCE.with_volume(Volume::new_relative(1.)),
+                settings: PlaybackSettings::ONCE
+                    .with_volume(Volume::new_relative(AUDIO_VOLUME)),
             },
         ));
     }
