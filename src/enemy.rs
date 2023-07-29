@@ -107,7 +107,7 @@ fn spawn_enemies(
 
         commands.spawn_batch((0..spawns).map(move |_| {
             let (x_offset, y_offset) =
-                random_point_within_radius(&mut rng, 1000., x_start, y_start);
+                random_point_within_radius(&mut rng, 1280., x_start, y_start);
             let transform =
                 Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.);
 
@@ -139,6 +139,11 @@ fn random_point_within_radius(
     let distance = rng.gen_range(0.0..radius);
     let x = player_x + distance * angle.cos();
     let y = player_y + distance * angle.sin();
+
+    if (x - player_x).abs() < 128. && (y - player_y).abs() < 128. {
+        return random_point_within_radius(rng, radius, player_x, player_y);
+    }
+
     (x, y)
 }
 
