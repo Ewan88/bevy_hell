@@ -38,7 +38,7 @@ fn main() {
             attacks::AttackPlugin,
             animation::AnimationPlugin,
         ))
-        .insert_resource(ClearColor(Color::rgb(0.4, 0.3, 0.6)))
+        .insert_resource(ClearColor(Color::rgb_u8(1, 50, 45)))
         .configure_set(Update, MovementSet.before(CollisionSet))
         .configure_set(Update, DespawnSet.after(CollisionSet))
         .run();
