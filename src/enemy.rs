@@ -1,9 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::{
-    CollisionSet, DespawnSet, MovementSet, AUDIO_VOLUME, BASE_MOVE_SPEED, SCREEN_HEIGHT,
-    SCREEN_WIDTH,
-};
+use crate::{CollisionSet, DespawnSet, MovementSet, AUDIO_VOLUME, BASE_MOVE_SPEED};
 
 use super::animation::{AnimationIndices, AnimationTimer};
 use super::assets::*;
@@ -142,10 +139,10 @@ fn random_point_within_radius(
     let distance = rng.gen_range(0.0..radius);
     let x = player_x + distance * angle.cos();
     let y = player_y + distance * angle.sin();
-    println!("x: {}, y: {}", x, y);
     (x, y)
 }
 
+#[allow(clippy::type_complexity)]
 fn enemy_movement(
     mut enemy_query: Query<(&mut Transform, &mut Enemy), (With<Enemy>, Without<Player>)>,
     player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
@@ -209,6 +206,7 @@ fn enemy_attack(
     }
 }
 
+#[allow(dead_code)]
 fn enemy_collision(mut transform_query: Query<&mut Transform, With<Enemy>>) {
     let mut transforms: QueryCombinationIter<'_, '_, &mut Transform, With<Enemy>, 2> =
         transform_query.iter_combinations_mut();
