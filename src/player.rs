@@ -7,7 +7,8 @@ pub struct Player {
     pub health: f32,
     pub recent_damage: bool,
     pub last_damage: f64,
-    pub direction: Vec2,
+    pub xp: u32,
+    pub level: u32,
 }
 
 impl Player {
@@ -16,7 +17,8 @@ impl Player {
             health: 100.,
             recent_damage: false,
             last_damage: 0.,
-            direction: Vec2::ZERO,
+            xp: 0,
+            level: 1,
         }
     }
 
@@ -24,6 +26,10 @@ impl Player {
         self.health -= 1.2;
         self.recent_damage = true;
         println!("Player health: {}", self.health)
+    }
+
+    pub fn xp_to_next_level(&self) -> u32 {
+        10 * self.xp
     }
 }
 
@@ -98,5 +104,13 @@ fn color_change_cooldown(
         sprite.color = Color::default();
     } else {
         sprite.color = Color::RED;
+    }
+}
+
+fn gain_level(mut player_query: Query<&mut Player>) {
+    let Ok(mut player) = player_query.get_single_mut() else { return; };
+
+    if player.xp_to_next_level() == 0 {
+        player.level += 1;
     }
 }
