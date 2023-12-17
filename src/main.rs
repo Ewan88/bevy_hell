@@ -39,7 +39,7 @@ fn main() {
             animation::AnimationPlugin,
         ))
         .insert_resource(ClearColor(Color::rgb_u8(1, 50, 45)))
-        .configure_set(Update, MovementSet.before(CollisionSet))
-        .configure_set(Update, DespawnSet.after(CollisionSet))
+        .configure_sets(Update, MovementSet.before(CollisionSet))
+        .configure_sets(Update, DespawnSet.after(CollisionSet))
         .run();
 }

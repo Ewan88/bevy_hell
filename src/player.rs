@@ -28,6 +28,7 @@ impl Player {
         println!("Player health: {}", self.health)
     }
 
+    #[allow(dead_code)]
     pub fn xp_to_next_level(&self) -> u32 {
         10 * self.xp
     }
@@ -56,7 +57,9 @@ fn setup_player(mut commands: Commands, icons: Res<Images>) {
 }
 
 fn kill_player(mut commands: Commands, mut player_query: Query<(Entity, &Player)>) {
-    let Ok((entity, player)) = player_query.get_single_mut() else { return; };
+    let Ok((entity, player)) = player_query.get_single_mut() else {
+        return;
+    };
     if player.health <= 0. {
         commands.entity(entity).despawn();
     }
@@ -68,8 +71,12 @@ fn damage_audio_cooldown(
     mut player_query: Query<&mut Player>,
     time: Res<Time>,
 ) {
-    let Ok((entity, mut sound)) = sound_query.get_single_mut() else { return; };
-    let Ok(mut player) = player_query.get_single_mut() else { return; };
+    let Ok((entity, mut sound)) = sound_query.get_single_mut() else {
+        return;
+    };
+    let Ok(mut player) = player_query.get_single_mut() else {
+        return;
+    };
 
     if !player.recent_damage {
         return;
@@ -92,7 +99,9 @@ fn color_change_cooldown(
     mut player_query: Query<(&Player, &mut Sprite), With<Player>>,
     time: Res<Time>,
 ) {
-    let Ok((player, mut sprite)) = player_query.get_single_mut() else { return; };
+    let Ok((player, mut sprite)) = player_query.get_single_mut() else {
+        return;
+    };
 
     if !player.recent_damage {
         return;
@@ -107,8 +116,11 @@ fn color_change_cooldown(
     }
 }
 
+#[allow(dead_code)]
 fn gain_level(mut player_query: Query<&mut Player>) {
-    let Ok(mut player) = player_query.get_single_mut() else { return; };
+    let Ok(mut player) = player_query.get_single_mut() else {
+        return;
+    };
 
     if player.xp_to_next_level() == 0 {
         player.level += 1;
