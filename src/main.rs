@@ -7,6 +7,7 @@ mod enemy;
 mod input;
 mod map;
 mod player;
+mod ui;
 
 use bevy::prelude::*;
 
@@ -37,6 +38,7 @@ fn main() {
             map::MapPlugin,
             attacks::AttackPlugin,
             animation::AnimationPlugin,
+            ui::UIPlugin,
         ))
         .insert_resource(ClearColor(Color::rgb_u8(1, 50, 45)))
         .configure_sets(Update, MovementSet.before(CollisionSet))

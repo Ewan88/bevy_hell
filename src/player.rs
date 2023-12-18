@@ -25,7 +25,6 @@ impl Player {
     pub fn receive_damage(&mut self) {
         self.health -= 1.2;
         self.recent_damage = true;
-        println!("Player health: {}", self.health)
     }
 
     #[allow(dead_code)]
