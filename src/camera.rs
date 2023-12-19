@@ -22,8 +22,12 @@ fn move_camera(
     mut camera_query: Query<&mut Transform, (With<GameCamera>, Without<Player>)>,
     player_query: Query<&Transform, (With<Player>, Without<GameCamera>)>,
 ) {
-    let Ok(player_transform) = player_query.get_single() else { return; };
-    let Ok(mut camera_transform) = camera_query.get_single_mut() else { return; };
+    let Ok(player_transform) = player_query.get_single() else {
+        return;
+    };
+    let Ok(mut camera_transform) = camera_query.get_single_mut() else {
+        return;
+    };
 
     camera_transform.translation = camera_transform
         .translation

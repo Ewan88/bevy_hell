@@ -92,7 +92,9 @@ fn spawn_enemies(
     }
 
     timer.countdown.tick(time.delta());
-    let Ok(&player_transform) = player_query.get_single() else { return; };
+    let Ok(&player_transform) = player_query.get_single() else {
+        return;
+    };
     let texture_handle = icon.blob.clone();
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 32.), 6, 1, None, None);
@@ -153,7 +155,9 @@ fn enemy_movement(
     player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
     time: Res<Time>,
 ) {
-    let Ok(player_transform) = player_query.get_single() else { return; };
+    let Ok(player_transform) = player_query.get_single() else {
+        return;
+    };
 
     for (mut transform, enemy) in enemy_query.iter_mut() {
         let diff = enemy.last_damage - time.elapsed_seconds_f64();
@@ -182,7 +186,9 @@ fn enemy_attack(
     audio_query: Query<&PlayerHitSound>,
     time: Res<Time>,
 ) {
-    let Ok((mut player_struct, player_transform)) = player_query.get_single_mut() else { return; };
+    let Ok((mut player_struct, player_transform)) = player_query.get_single_mut() else {
+        return;
+    };
 
     for transform in enemy_query.iter() {
         let distance = Vec2::new(
@@ -236,7 +242,9 @@ fn despawn_enemies(
     player_query: Query<&Transform, With<Player>>,
     time: Res<Time>,
 ) {
-    let Ok(player_transform) = player_query.get_single() else { return; };
+    let Ok(player_transform) = player_query.get_single() else {
+        return;
+    };
     for (transform, entity, enemy) in enemy_query.iter() {
         let distance = Vec2::new(
             player_transform.translation.x - transform.translation.x,

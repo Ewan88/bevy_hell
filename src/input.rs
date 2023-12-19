@@ -20,7 +20,9 @@ fn keyboard_input_system(
     mut player_query: Query<&mut Transform, (With<Player>, Without<GameCamera>)>,
     time: Res<Time>,
 ) {
-    let Ok(mut player_transform) = player_query.get_single_mut() else { return; };
+    let Ok(mut player_transform) = player_query.get_single_mut() else {
+        return;
+    };
     if key_pressed(&input, KEY_MAP[0]) {
         player_transform.translation.y += 1. * BASE_MOVE_SPEED * time.delta_seconds();
     }

@@ -71,7 +71,9 @@ fn spawn_attacks(
 ) {
     spawner.cooldown.tick(time.delta());
     spawner.next_attack.tick(time.delta());
-    let Ok(&player_transform) = player_query.get_single() else { return; };
+    let Ok(&player_transform) = player_query.get_single() else {
+        return;
+    };
 
     if spawner.cooldown.finished() || spawner.next_attack.finished() {
         if spawner.attack_i < spawner.n_attacks - 1 {
