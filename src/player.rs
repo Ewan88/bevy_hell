@@ -9,6 +9,7 @@ pub struct Player {
     pub last_damage: f64,
     pub xp: u32,
     pub level: u32,
+    pub next_level: u32,
 }
 
 impl Player {
@@ -19,6 +20,7 @@ impl Player {
             last_damage: 0.,
             xp: 0,
             level: 1,
+            next_level: 100,
         }
     }
 
@@ -27,9 +29,12 @@ impl Player {
         self.recent_damage = true;
     }
 
-    #[allow(dead_code)]
     pub fn xp_to_next_level(&self) -> u32 {
-        10 * self.xp
+        10 * self.next_level
+    }
+
+    pub fn gain_xp(&mut self, xp: u32) {
+        self.xp += xp;
     }
 }
 
@@ -115,13 +120,13 @@ fn color_change_cooldown(
     }
 }
 
-#[allow(dead_code)]
 fn gain_level(mut player_query: Query<&mut Player>) {
     let Ok(mut player) = player_query.get_single_mut() else {
         return;
     };
 
-    if player.xp_to_next_level() == 0 {
+    if player.xp > player.next_level {
         player.level += 1;
+        player.next_level = player.xp_to_next_level();
     }
 }

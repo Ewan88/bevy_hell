@@ -239,10 +239,10 @@ fn enemy_collision(mut transform_query: Query<&mut Transform, With<Enemy>>) {
 fn despawn_enemies(
     mut commands: Commands,
     enemy_query: Query<(&Transform, Entity, &Enemy), With<Enemy>>,
-    player_query: Query<&Transform, With<Player>>,
+    mut player_query: Query<(&Transform, &mut Player), With<Player>>,
     time: Res<Time>,
 ) {
-    let Ok(player_transform) = player_query.get_single() else {
+    let Ok((player_transform, mut player)) = player_query.get_single_mut() else {
         return;
     };
     for (transform, entity, enemy) in enemy_query.iter() {
@@ -251,9 +251,9 @@ fn despawn_enemies(
             player_transform.translation.y - transform.translation.y,
         );
         if distance.length() > 4000. || distance.length() < -4000. {
-            println!("despawning out of bounds enemy");
             commands.entity(entity).despawn();
         } else if enemy.health <= 0. {
+            player.gain_xp(25);
             let diff = enemy.last_damage - time.elapsed_seconds_f64();
             if diff < -0.5 {
                 commands.entity(entity).despawn();
