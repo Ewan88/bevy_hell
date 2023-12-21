@@ -20,7 +20,7 @@ impl Player {
             last_damage: 0.,
             xp: 0,
             level: 1,
-            next_level: 100,
+            next_level: 1000,
         }
     }
 
@@ -30,7 +30,7 @@ impl Player {
     }
 
     pub fn xp_to_next_level(&self) -> u32 {
-        10 * self.next_level
+        2 * self.next_level
     }
 
     pub fn gain_xp(&mut self, xp: u32) {
@@ -44,7 +44,12 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, setup_player).add_systems(
             Update,
-            (kill_player, damage_audio_cooldown, color_change_cooldown),
+            (
+                kill_player,
+                damage_audio_cooldown,
+                color_change_cooldown,
+                gain_level,
+            ),
         );
     }
 }
@@ -87,13 +92,15 @@ fn damage_audio_cooldown(
     }
 
     let diff = player.last_damage - time.elapsed_seconds_f64();
+    println!("Player hit sound diff: {}", diff);
 
-    if diff < 1. {
+    if diff < -0.001 {
         sound.timer.tick(time.delta());
+        println!("Player hit sound ticking");
     }
 
     if sound.timer.finished() {
-        println!("Sound timer finished");
+        println!("Player hit sound finished");
         player.recent_damage = false;
         commands.entity(entity).despawn();
     }

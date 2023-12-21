@@ -1,6 +1,6 @@
 use crate::player::*;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, ui::update};
 
 #[derive(Component)]
 pub struct PlayerHealth;
@@ -11,12 +11,17 @@ pub struct XPText;
 #[derive(Component)]
 pub struct LevelText;
 
+#[derive(Component)]
+pub struct TimeText;
+
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, build_ui)
-            .add_systems(Update, (update_health, update_xp, update_level));
+        app.add_systems(PostStartup, build_ui).add_systems(
+            Update,
+            (update_health, update_xp, update_level, update_time),
+        );
     }
 }
 
@@ -33,6 +38,7 @@ fn build_ui(mut commands: Commands) {
                 TextBundle::from_section("", TextStyle::default()),
                 LevelText,
             ));
+            parent.spawn((TextBundle::from_section("", TextStyle::default()), TimeText));
         });
 }
 
@@ -76,4 +82,16 @@ fn update_level(
     };
 
     level_text.sections[0].value = format!("Level: {}", player.level);
+}
+
+fn update_time(time: Res<Time>, mut time_query: Query<&mut Text, With<TimeText>>) {
+    let Ok(mut time_text) = time_query.get_single_mut() else {
+        return;
+    };
+
+    let total_seconds = time.elapsed_seconds_f64().round() as u32;
+    let minutes = total_seconds / 60;
+    let seconds = total_seconds % 60;
+
+    time_text.sections[0].value = format!("Time: {:02}:{:02}", minutes, seconds);
 }

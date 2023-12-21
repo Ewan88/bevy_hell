@@ -161,7 +161,7 @@ fn enemy_movement(
 
     for (mut transform, enemy) in enemy_query.iter_mut() {
         let diff = enemy.last_damage - time.elapsed_seconds_f64();
-        if diff > -0.2 {
+        if diff > -0.5 {
             continue;
         }
 
@@ -253,9 +253,9 @@ fn despawn_enemies(
         if distance.length() > 4000. || distance.length() < -4000. {
             commands.entity(entity).despawn();
         } else if enemy.health <= 0. {
-            player.gain_xp(25);
             let diff = enemy.last_damage - time.elapsed_seconds_f64();
             if diff < -0.5 {
+                player.gain_xp(25);
                 commands.entity(entity).despawn();
             }
         }
@@ -270,7 +270,7 @@ fn color_change_cooldown(
         let diff = enemy.last_damage - time.elapsed_seconds_f64();
         if diff > -0.2 {
             sprite.color = Color::GRAY;
-        } else if diff < -0.2 {
+        } else if diff < -0.5 {
             sprite.color = Color::default();
         }
     }
