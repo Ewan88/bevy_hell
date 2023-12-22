@@ -92,15 +92,12 @@ fn damage_audio_cooldown(
     }
 
     let diff = player.last_damage - time.elapsed_seconds_f64();
-    println!("Player hit sound diff: {}", diff);
 
     if diff < -0.001 {
         sound.timer.tick(time.delta());
-        println!("Player hit sound ticking");
     }
 
     if sound.timer.finished() {
-        println!("Player hit sound finished");
         player.recent_damage = false;
         commands.entity(entity).despawn();
     }

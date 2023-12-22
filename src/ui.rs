@@ -1,6 +1,6 @@
 use crate::player::*;
 
-use bevy::{prelude::*, ui::update};
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct PlayerHealth;
@@ -27,18 +27,69 @@ impl Plugin for UIPlugin {
 
 fn build_ui(mut commands: Commands) {
     commands
-        .spawn(NodeBundle { ..default() })
+        .spawn(NodeBundle {
+            style: Style {
+                width: Val::Percent(95.0),
+                height: Val::Percent(95.0),
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::SpaceBetween,
+                align_items: AlignItems::Center,
+                align_self: AlignSelf::Center,
+                ..default()
+            },
+            ..default()
+        })
         .with_children(|parent| {
-            parent.spawn((
-                TextBundle::from_section("", TextStyle::default()),
-                PlayerHealth,
-            ));
-            parent.spawn((TextBundle::from_section("", TextStyle::default()), XPText));
-            parent.spawn((
-                TextBundle::from_section("", TextStyle::default()),
-                LevelText,
-            ));
             parent.spawn((TextBundle::from_section("", TextStyle::default()), TimeText));
+            parent.spawn(NodeBundle {
+                style: Style {
+                    left: Val::Percent(0.),
+                    top: Val::Percent(-5.),
+                    width: Val::Percent(110.0),
+                    height: Val::Percent(10.0),
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
+                background_color: Color::rgba(0., 0., 0., 0.5).into(),
+                ..default()
+            });
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(95.0),
+                        justify_content: JustifyContent::SpaceBetween,
+                        justify_items: JustifyItems::Stretch,
+                        align_self: AlignSelf::Center,
+                        ..default()
+                    },
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        TextBundle::from_section("", TextStyle::default()),
+                        PlayerHealth,
+                    ));
+                    parent.spawn((
+                        TextBundle::from_section("", TextStyle::default()),
+                        XPText,
+                    ));
+                    parent.spawn((
+                        TextBundle::from_section("", TextStyle::default()),
+                        LevelText,
+                    ));
+                });
+            parent.spawn(NodeBundle {
+                style: Style {
+                    width: Val::Percent(110.),
+                    height: Val::Percent(10.),
+                    left: Val::Percent(0.),
+                    bottom: Val::Percent(-5.),
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
+                background_color: Color::rgba(0., 0., 0., 0.5).into(),
+                ..default()
+            });
         });
 }
 
