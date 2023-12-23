@@ -17,6 +17,13 @@ pub const AUDIO_VOLUME: f32 = 0.5;
 
 pub const BASE_MOVE_SPEED: f32 = 100.;
 
+#[derive(SystemSet, States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
+pub enum GameState {
+    #[default]
+    Running,
+    GameOver,
+}
+
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MovementSet;
 
@@ -43,5 +50,6 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb_u8(1, 50, 45)))
         .configure_sets(Update, MovementSet.before(CollisionSet))
         .configure_sets(Update, DespawnSet.after(CollisionSet))
+        .add_state::<GameState>()
         .run();
 }

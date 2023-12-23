@@ -1,4 +1,4 @@
-use crate::player::*;
+use crate::{player::*, GameState};
 
 use bevy::prelude::*;
 
@@ -22,6 +22,7 @@ impl Plugin for UIPlugin {
             Update,
             (update_health, update_xp, update_level, update_time),
         );
+        app.add_systems(OnEnter(GameState::GameOver), spawn_game_over_text);
     }
 }
 
@@ -93,6 +94,30 @@ fn build_ui(mut commands: Commands) {
         });
 }
 
+fn spawn_game_over_text(mut commands: Commands) {
+    commands
+        .spawn(NodeBundle {
+            style: Style {
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            background_color: Color::rgba(0., 0., 0., 0.5).into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                "GAME OVER",
+                TextStyle {
+                    font_size: 100.,
+                    ..default()
+                },
+            ));
+        });
+}
+
 fn update_health(
     player_query: Query<&Player>,
     mut health_query: Query<&mut Text, With<PlayerHealth>>,
@@ -105,7 +130,8 @@ fn update_health(
         return;
     };
 
-    health_text.sections[0].value = format!("Health: {}", player.health.round());
+    let health = std::cmp::max(player.health as i32, 0);
+    health_text.sections[0].value = format!("Health: {}", health);
 }
 
 fn update_xp(player_query: Query<&Player>, mut xp_query: Query<&mut Text, With<XPText>>) {

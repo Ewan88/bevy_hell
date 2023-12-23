@@ -1,6 +1,8 @@
 use std::f32::consts::PI;
 
-use crate::{CollisionSet, DespawnSet, MovementSet, AUDIO_VOLUME, BASE_MOVE_SPEED};
+use crate::{
+    CollisionSet, DespawnSet, GameState, MovementSet, AUDIO_VOLUME, BASE_MOVE_SPEED,
+};
 
 use super::animation::{AnimationIndices, AnimationTimer};
 use super::assets::*;
@@ -85,7 +87,12 @@ fn spawn_enemies(
     mut timer: ResMut<SpawnTimer>,
     time: Res<Time>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    state: Res<State<GameState>>,
 ) {
+    if *state != GameState::Running {
+        return;
+    }
+
     let enemy_count = enemy_query.iter().count();
     if enemy_count > 10000 {
         return;

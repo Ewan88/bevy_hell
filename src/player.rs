@@ -1,4 +1,4 @@
-use crate::assets::*;
+use crate::{assets::*, GameState};
 
 use bevy::prelude::*;
 
@@ -65,12 +65,17 @@ fn setup_player(mut commands: Commands, icons: Res<Images>) {
     ));
 }
 
-fn kill_player(mut commands: Commands, mut player_query: Query<(Entity, &Player)>) {
+fn kill_player(
+    mut commands: Commands,
+    mut player_query: Query<(Entity, &Player)>,
+    mut game_state: ResMut<NextState<GameState>>,
+) {
     let Ok((entity, player)) = player_query.get_single_mut() else {
         return;
     };
     if player.health <= 0. {
         commands.entity(entity).despawn();
+        game_state.set(GameState::GameOver);
     }
 }
 
