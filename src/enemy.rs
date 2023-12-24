@@ -145,11 +145,11 @@ fn random_point_within_radius(
     player_y: f32,
 ) -> (f32, f32) {
     let angle = rng.gen_range(0.0..PI * 2.0);
-    let distance = rng.gen_range(0.0..radius);
+    let distance = rng.gen_range(270.0..radius);
     let x = player_x + distance * angle.cos();
     let y = player_y + distance * angle.sin();
 
-    if (x - player_x).abs() < 128. && (y - player_y).abs() < 128. {
+    if (x - player_x).abs() < 254. && (y - player_y).abs() < 254. {
         return random_point_within_radius(rng, radius, player_x, player_y);
     }
 
@@ -176,10 +176,10 @@ fn enemy_movement(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
         );
-        let direction = direction.normalize();
+        let direction = direction.normalize() * BASE_MOVE_SPEED;
 
-        transform.translation.x += direction.x * time.delta_seconds() * BASE_MOVE_SPEED;
-        transform.translation.y += direction.y * time.delta_seconds() * BASE_MOVE_SPEED;
+        transform.translation.x += direction.x * time.delta_seconds();
+        transform.translation.y += direction.y * time.delta_seconds();
     }
 }
 
