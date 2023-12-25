@@ -17,10 +17,10 @@ fn key_pressed(input: &Res<Input<KeyCode>>, key_code: KeyCode) -> bool {
 
 fn keyboard_input_system(
     input: Res<Input<KeyCode>>,
-    mut player_query: Query<&mut Transform, (With<Player>, Without<GameCamera>)>,
+    mut player_query: Query<(&mut Transform, &mut Sprite), (With<Player>, Without<GameCamera>)>,
     time: Res<Time>,
 ) {
-    let Ok(mut player_transform) = player_query.get_single_mut() else {
+    let Ok((mut player_transform, mut sprite)) = player_query.get_single_mut() else {
         return;
     };
     if key_pressed(&input, KEY_MAP[0]) {
@@ -28,11 +28,13 @@ fn keyboard_input_system(
     }
     if key_pressed(&input, KEY_MAP[1]) {
         player_transform.translation.x -= 1. * BASE_MOVE_SPEED * time.delta_seconds();
+        sprite.flip_x = true;
     }
     if key_pressed(&input, KEY_MAP[2]) {
         player_transform.translation.y -= 1. * BASE_MOVE_SPEED * time.delta_seconds();
     }
     if key_pressed(&input, KEY_MAP[3]) {
         player_transform.translation.x += 1. * BASE_MOVE_SPEED * time.delta_seconds();
+        sprite.flip_x = false;
     }
 }

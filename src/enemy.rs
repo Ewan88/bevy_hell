@@ -158,7 +158,7 @@ fn random_point_within_radius(
 
 #[allow(clippy::type_complexity)]
 fn enemy_movement(
-    mut enemy_query: Query<(&mut Transform, &mut Enemy), (With<Enemy>, Without<Player>)>,
+    mut enemy_query: Query<(&mut Transform, &mut Enemy, &mut TextureAtlasSprite), (With<Enemy>, Without<Player>)>,
     player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
     time: Res<Time>,
 ) {
@@ -166,7 +166,7 @@ fn enemy_movement(
         return;
     };
 
-    for (mut transform, enemy) in enemy_query.iter_mut() {
+    for (mut transform, enemy, mut sprite) in enemy_query.iter_mut() {
         let diff = enemy.last_damage - time.elapsed_seconds_f64();
         if diff > -0.5 {
             continue;
@@ -180,6 +180,12 @@ fn enemy_movement(
 
         transform.translation.x += direction.x * time.delta_seconds();
         transform.translation.y += direction.y * time.delta_seconds();
+
+        if transform.translation.x > player_transform.translation.x {
+            sprite.flip_x = true;
+        } else {
+            sprite.flip_x = false;
+        }
     }
 }
 
