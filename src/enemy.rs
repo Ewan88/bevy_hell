@@ -156,9 +156,11 @@ fn random_point_within_radius(
     (x, y)
 }
 
-#[allow(clippy::type_complexity)]
 fn enemy_movement(
-    mut enemy_query: Query<(&mut Transform, &mut Enemy, &mut TextureAtlasSprite), (With<Enemy>, Without<Player>)>,
+    mut enemy_query: Query<
+        (&mut Transform, &mut Enemy, &mut TextureAtlasSprite),
+        (With<Enemy>, Without<Player>),
+    >,
     player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
     time: Res<Time>,
 ) {
@@ -189,7 +191,6 @@ fn enemy_movement(
     }
 }
 
-#[allow(clippy::type_complexity)]
 fn enemy_attack(
     mut commands: Commands,
     audio: Res<Audio>,

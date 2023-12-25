@@ -122,7 +122,6 @@ fn attack_lifetime(
     }
 }
 
-#[allow(clippy::type_complexity)]
 fn attack_collision(
     mut attack_query: Query<&Transform, (With<Attack>, Without<Enemy>)>,
     mut enemy_query: Query<(&mut Enemy, &Transform), (With<Enemy>, Without<Attack>)>,

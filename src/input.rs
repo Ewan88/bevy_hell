@@ -17,7 +17,10 @@ fn key_pressed(input: &Res<Input<KeyCode>>, key_code: KeyCode) -> bool {
 
 fn keyboard_input_system(
     input: Res<Input<KeyCode>>,
-    mut player_query: Query<(&mut Transform, &mut Sprite), (With<Player>, Without<GameCamera>)>,
+    mut player_query: Query<
+        (&mut Transform, &mut Sprite),
+        (With<Player>, Without<GameCamera>),
+    >,
     time: Res<Time>,
 ) {
     let Ok((mut player_transform, mut sprite)) = player_query.get_single_mut() else {

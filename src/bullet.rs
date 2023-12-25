@@ -49,7 +49,6 @@ fn bullet_lifetime(
     }
 }
 
-#[allow(clippy::type_complexity)]
 fn bullet_collision(
     mut bullet_query: Query<&Transform, (With<Bullet>, Without<Enemy>)>,
     mut enemy_query: Query<(&mut Enemy, &Transform), (With<Enemy>, Without<Bullet>)>,
