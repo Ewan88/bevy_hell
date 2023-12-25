@@ -4,6 +4,7 @@ mod attacks;
 mod bullet;
 mod camera;
 mod enemy;
+mod grid;
 mod input;
 mod map;
 mod player;
@@ -46,10 +47,17 @@ fn main() {
             attacks::AttackPlugin,
             animation::AnimationPlugin,
             ui::UIPlugin,
+            grid::GridPlugin,
         ))
         .insert_resource(ClearColor(Color::rgb_u8(1, 50, 45)))
-        .configure_sets(Update, MovementSet.before(CollisionSet))
-        .configure_sets(Update, DespawnSet.after(CollisionSet))
+        .configure_sets(
+            Update,
+            (
+                MovementSet.before(CollisionSet),
+                CollisionSet.after(MovementSet),
+                DespawnSet.after(CollisionSet),
+            ),
+        )
         .add_state::<GameState>()
         .run();
 }

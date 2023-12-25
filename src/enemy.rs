@@ -8,7 +8,6 @@ use super::animation::{AnimationIndices, AnimationTimer};
 use super::assets::*;
 use super::player::*;
 use bevy::audio::Volume;
-use bevy::ecs::query::QueryCombinationIter;
 use bevy::prelude::*;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
@@ -227,25 +226,6 @@ fn enemy_attack(
             }
             player_struct.receive_damage();
             player_struct.last_damage = time.elapsed_seconds_f64();
-        }
-    }
-}
-
-#[allow(dead_code)]
-fn enemy_collision(mut transform_query: Query<&mut Transform, With<Enemy>>) {
-    let mut transforms: QueryCombinationIter<'_, '_, &mut Transform, With<Enemy>, 2> =
-        transform_query.iter_combinations_mut();
-    while let Some([mut transform1, mut transform2]) = transforms.fetch_next() {
-        let distance = Vec2::new(
-            transform1.translation.x - transform2.translation.x,
-            transform1.translation.y - transform2.translation.y,
-        );
-        if distance.length() <= 32. {
-            let direction = distance.normalize();
-            transform1.translation.x += direction.x * 2.;
-            transform1.translation.y += direction.y * 2.;
-            transform2.translation.x -= direction.x * 2.;
-            transform2.translation.y -= direction.y * 2.;
         }
     }
 }
