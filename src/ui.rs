@@ -14,13 +14,16 @@ pub struct LevelText;
 #[derive(Component)]
 pub struct TimeText;
 
+#[derive(Component)]
+pub struct PositionText;
+
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, build_ui).add_systems(
+        app.add_systems(PostStartup, (build_ui, build_debugging_text)).add_systems(
             Update,
-            (update_health, update_xp, update_level, update_time),
+            (update_health, update_xp, update_level, update_time, update_position_text),
         );
         app.add_systems(OnEnter(GameState::GameOver), spawn_game_over_text);
     }
@@ -92,6 +95,21 @@ fn build_ui(mut commands: Commands) {
                 ..default()
             });
         });
+}
+
+fn build_debugging_text(mut commands: Commands) {
+    commands.spawn(NodeBundle {
+        style: Style {
+            position_type: PositionType::Absolute,
+            left: Val::Percent(0.),
+            top: Val::Percent(7.5),
+            ..default()
+        },
+        ..default()
+    })
+    .with_children(|parent| {
+        parent.spawn((TextBundle::from_section("", TextStyle::default()), PositionText));
+    });
 }
 
 fn spawn_game_over_text(mut commands: Commands) {
@@ -171,4 +189,22 @@ fn update_time(time: Res<Time>, mut time_query: Query<&mut Text, With<TimeText>>
     let seconds = total_seconds % 60;
 
     time_text.sections[0].value = format!("Time: {:02}:{:02}", minutes, seconds);
+}
+
+fn update_position_text(
+    mut text_query: Query<&mut Text, With<PositionText>>,
+    player_query: Query<&Transform, With<Player>>,
+) {
+    let Ok(transform) = player_query.get_single() else {
+        return;
+    };
+
+    let Ok(mut text) = text_query.get_single_mut() else {
+        return;
+    };
+
+    text.sections[0].value = format!(
+        "{:.2} {:.2}",
+        transform.translation.x, transform.translation.y
+    );
 }
