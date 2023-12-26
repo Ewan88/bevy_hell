@@ -21,10 +21,17 @@ pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, (build_ui, build_debugging_text)).add_systems(
-            Update,
-            (update_health, update_xp, update_level, update_time, update_position_text),
-        );
+        app.add_systems(PostStartup, (build_ui, build_debugging_text))
+            .add_systems(
+                Update,
+                (
+                    update_health,
+                    update_xp,
+                    update_level,
+                    update_time,
+                    update_position_text,
+                ),
+            );
         app.add_systems(OnEnter(GameState::GameOver), spawn_game_over_text);
     }
 }
@@ -98,18 +105,22 @@ fn build_ui(mut commands: Commands) {
 }
 
 fn build_debugging_text(mut commands: Commands) {
-    commands.spawn(NodeBundle {
-        style: Style {
-            position_type: PositionType::Absolute,
-            left: Val::Percent(0.),
-            top: Val::Percent(7.5),
+    commands
+        .spawn(NodeBundle {
+            style: Style {
+                position_type: PositionType::Absolute,
+                left: Val::Percent(0.),
+                top: Val::Percent(7.5),
+                ..default()
+            },
             ..default()
-        },
-        ..default()
-    })
-    .with_children(|parent| {
-        parent.spawn((TextBundle::from_section("", TextStyle::default()), PositionText));
-    });
+        })
+        .with_children(|parent| {
+            parent.spawn((
+                TextBundle::from_section("", TextStyle::default()),
+                PositionText,
+            ));
+        });
 }
 
 fn spawn_game_over_text(mut commands: Commands) {

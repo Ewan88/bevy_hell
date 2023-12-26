@@ -7,10 +7,14 @@ mod enemy;
 mod grid;
 mod input;
 mod map;
+mod pickups;
 mod player;
 mod ui;
 
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
+use rand::{rngs::SmallRng, Rng};
 
 pub const SCREEN_WIDTH: f32 = 1280.;
 pub const SCREEN_HEIGHT: f32 = 720.;
@@ -34,6 +38,9 @@ pub struct CollisionSet;
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DespawnSet;
 
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+pub struct SpawnSet;
+
 fn main() {
     App::new()
         .add_plugins((
@@ -48,16 +55,37 @@ fn main() {
             animation::AnimationPlugin,
             ui::UIPlugin,
             grid::GridPlugin,
+            pickups::PickupPlugin,
         ))
         .insert_resource(ClearColor(Color::rgb_u8(1, 50, 45)))
         .configure_sets(
             Update,
             (
+                SpawnSet.before(MovementSet),
                 MovementSet.before(CollisionSet),
-                CollisionSet.after(MovementSet),
+                CollisionSet.before(DespawnSet),
                 DespawnSet.after(CollisionSet),
             ),
         )
         .add_state::<GameState>()
         .run();
+}
+
+pub fn random_point_within_radius(
+    rng: &mut SmallRng,
+    radius: f32,
+    player_x: f32,
+    player_y: f32,
+    min: f32,
+) -> (f32, f32) {
+    let angle = rng.gen_range(0.0..PI * 2.0);
+    let distance = rng.gen_range(min..radius);
+    let x = player_x + distance * angle.cos();
+    let y = player_y + distance * angle.sin();
+
+    if (x - player_x).abs() < 254. && (y - player_y).abs() < 254. {
+        return random_point_within_radius(rng, radius, player_x, player_y, min);
+    }
+
+    (x, y)
 }

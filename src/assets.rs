@@ -5,6 +5,7 @@ pub struct Images {
     pub samurai: Handle<Image>,
     pub blob: Handle<Image>,
     pub slash_attack: Handle<Image>,
+    pub health_potion: Handle<Image>,
 }
 
 #[derive(Resource)]
@@ -32,6 +33,7 @@ fn setup_images(mut commands: Commands, asset_server: Res<AssetServer>) {
         samurai: asset_server.load("samurai.png"),
         blob: asset_server.load("blob.png"),
         slash_attack: asset_server.load("slash_attack.png"),
+        health_potion: asset_server.load("health_potion.png"),
     });
 }
 

@@ -1,7 +1,7 @@
-use std::f32::consts::PI;
-
+use crate::random_point_within_radius;
 use crate::{
-    CollisionSet, DespawnSet, GameState, MovementSet, AUDIO_VOLUME, BASE_MOVE_SPEED,
+    CollisionSet, DespawnSet, GameState, MovementSet, SpawnSet, AUDIO_VOLUME,
+    BASE_MOVE_SPEED,
 };
 
 use super::animation::{AnimationIndices, AnimationTimer};
@@ -32,9 +32,8 @@ impl Plugin for EnemyPlugin {
             .add_systems(
                 Update,
                 (
-                    spawn_enemies,
+                    spawn_enemies.in_set(SpawnSet),
                     enemy_movement.in_set(MovementSet),
-                    //enemy_collision.in_set(CollisionSet),
                     enemy_attack.in_set(CollisionSet),
                     color_change_cooldown,
                     despawn_enemies.in_set(DespawnSet),
@@ -115,7 +114,7 @@ fn spawn_enemies(
 
         commands.spawn_batch((0..spawns).map(move |_| {
             let (x_offset, y_offset) =
-                random_point_within_radius(&mut rng, 1280., x_start, y_start);
+                random_point_within_radius(&mut rng, 1280., x_start, y_start, 300.);
             let transform =
                 Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.);
 
@@ -135,24 +134,6 @@ fn spawn_enemies(
             )
         }));
     }
-}
-
-fn random_point_within_radius(
-    rng: &mut SmallRng,
-    radius: f32,
-    player_x: f32,
-    player_y: f32,
-) -> (f32, f32) {
-    let angle = rng.gen_range(0.0..PI * 2.0);
-    let distance = rng.gen_range(270.0..radius);
-    let x = player_x + distance * angle.cos();
-    let y = player_y + distance * angle.sin();
-
-    if (x - player_x).abs() < 254. && (y - player_y).abs() < 254. {
-        return random_point_within_radius(rng, radius, player_x, player_y);
-    }
-
-    (x, y)
 }
 
 fn enemy_movement(
