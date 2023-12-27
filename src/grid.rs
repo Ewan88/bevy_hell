@@ -30,8 +30,8 @@ fn update_grid(mut grid: ResMut<Grid>, query: Query<(Entity, &Transform), With<E
     grid.cells.clear();
     for (entity, transform) in query.iter() {
         let cell = (
-            (transform.translation.x / 300.) as i32,
-            (transform.translation.y / 300.) as i32,
+            (transform.translation.x / 120.) as i32,
+            (transform.translation.y / 120.) as i32,
         );
         grid.cells.entry(cell).or_default().push(entity);
     }
@@ -50,7 +50,7 @@ fn enemy_collision(grid: Res<Grid>, mut transforms: Query<&mut Transform, With<E
                             transform1.translation.x - transform2.translation.x,
                             transform1.translation.y - transform2.translation.y,
                         );
-                        if distance.length() <= 32. {
+                        if distance.length() <= 40. {
                             Some(distance.normalize())
                         } else {
                             None

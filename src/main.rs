@@ -73,18 +73,18 @@ fn main() {
 
 pub fn random_point_within_radius(
     rng: &mut SmallRng,
-    radius: f32,
     player_x: f32,
     player_y: f32,
-    min: f32,
 ) -> (f32, f32) {
     let angle = rng.gen_range(0.0..PI * 2.0);
+    let min = (SCREEN_WIDTH.powi(2) + SCREEN_HEIGHT.powi(2)).sqrt() / 2.0;
+    let radius = min * 2.0;
     let distance = rng.gen_range(min..radius);
     let x = player_x + distance * angle.cos();
     let y = player_y + distance * angle.sin();
 
-    if (x - player_x).abs() < 254. && (y - player_y).abs() < 254. {
-        return random_point_within_radius(rng, radius, player_x, player_y, min);
+    if (x - player_x).abs() < min && (y - player_y).abs() < min {
+        return random_point_within_radius(rng, player_x, player_y);
     }
 
     (x, y)

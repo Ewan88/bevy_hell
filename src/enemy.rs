@@ -97,9 +97,11 @@ fn spawn_enemies(
     }
 
     timer.countdown.tick(time.delta());
+
     let Ok(&player_transform) = player_query.get_single() else {
         return;
     };
+
     let texture_handle = icon.blob.clone();
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 32.), 6, 1, None, None);
@@ -108,13 +110,18 @@ fn spawn_enemies(
 
     if timer.countdown.finished() {
         let mut rng = SmallRng::from_entropy();
-        let spawns: i32 = rng.gen_range(5..10);
+        let elapsed_time = time.elapsed_seconds();
+        let new_duration = (1. - elapsed_time / 120.).max(0.1);
+        let min_spawns = (elapsed_time / 60.).ceil() as i32;
+        let max_spawns = (elapsed_time / 30.).ceil() as i32;
+        let spawns: i32 = rng.gen_range(min_spawns..max_spawns.max(min_spawns + 1));
         let x_start = player_transform.translation.x;
         let y_start = player_transform.translation.y;
 
+        println!("spawns: {}", spawns);
         commands.spawn_batch((0..spawns).map(move |_| {
             let (x_offset, y_offset) =
-                random_point_within_radius(&mut rng, 1280., x_start, y_start, 300.);
+                random_point_within_radius(&mut rng, x_start, y_start);
             let transform =
                 Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.);
 
@@ -123,7 +130,7 @@ fn spawn_enemies(
                     texture_atlas: texture_atlas_handle.clone(),
                     sprite: TextureAtlasSprite::new(animation_indices.first),
                     transform,
-                    ..Default::default()
+                    ..default()
                 },
                 Enemy {
                     health: 10.,
@@ -133,6 +140,9 @@ fn spawn_enemies(
                 AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             )
         }));
+
+        timer.countdown = Timer::from_seconds(new_duration, TimerMode::Repeating);
+        println!("new duration: {}", new_duration)
     }
 }
 
