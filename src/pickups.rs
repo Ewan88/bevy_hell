@@ -19,7 +19,7 @@ impl SpawnTimer {
         let mut rng = SmallRng::from_entropy();
         Self {
             countdown: Timer::from_seconds(
-                rng.gen_range(60.0..120.),
+                rng.gen_range(10.0..30.),
                 TimerMode::Repeating,
             ),
         }
@@ -62,10 +62,9 @@ pub fn spawn_pickups(
         let x_start = player_transform.translation.x;
         let y_start = player_transform.translation.y;
         let (x_offset, y_offset) =
-            random_point_within_radius(&mut rng, 1280., x_start, y_start, 700.);
+            random_point_within_radius(&mut rng, x_start, y_start);
 
         let transform = Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.);
-        println!("Spawning pickup at {:?}", transform.translation);
         commands.spawn((
             SpriteBundle {
                 transform,
@@ -77,4 +76,23 @@ pub fn spawn_pickups(
     }
 }
 
-pub fn pickup_collision() {}
+pub fn pickup_collision(
+    mut commands: Commands,
+    mut player_query: Query<(&mut Player, &Transform), With<Player>>,
+    pickup_query: Query<(Entity, &Transform), With<Pickup>>,
+) {
+    let Ok((mut player, player_transform)) = player_query.get_single_mut() else {
+        return;
+    };
+
+    for (entity, transform) in pickup_query.iter() {
+        let distance = Vec2::new(
+            player_transform.translation.x - transform.translation.x,
+            player_transform.translation.y - transform.translation.y,
+        );
+        if distance.length() <= 32. {
+            player.health = (player.health +25.).min(player.max_health);
+            commands.entity(entity).despawn();
+        }
+    }
+}

@@ -5,6 +5,7 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct Player {
     pub health: f32,
+    pub max_health: f32,
     pub recent_damage: bool,
     pub last_damage: f64,
     pub xp: u32,
@@ -16,6 +17,7 @@ impl Player {
     pub fn new() -> Self {
         Self {
             health: 100.,
+            max_health: 100.,
             recent_damage: false,
             last_damage: 0.,
             xp: 0,
