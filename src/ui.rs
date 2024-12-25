@@ -61,7 +61,7 @@ fn build_ui(mut commands: Commands) {
                     position_type: PositionType::Absolute,
                     ..default()
                 },
-                background_color: Color::rgba(0., 0., 0., 0.5).into(),
+                background_color: Color::srgba(0., 0., 0., 0.5).into(),
                 ..default()
             });
             parent
@@ -98,7 +98,7 @@ fn build_ui(mut commands: Commands) {
                     position_type: PositionType::Absolute,
                     ..default()
                 },
-                background_color: Color::rgba(0., 0., 0., 0.5).into(),
+                background_color: Color::srgba(0., 0., 0., 0.5).into(),
                 ..default()
             });
         });
@@ -133,7 +133,7 @@ fn spawn_game_over_text(mut commands: Commands) {
                 align_items: AlignItems::Center,
                 ..default()
             },
-            background_color: Color::rgba(0., 0., 0., 0.5).into(),
+            background_color: Color::srgba(0., 0., 0., 0.5).into(),
             ..default()
         })
         .with_children(|parent| {

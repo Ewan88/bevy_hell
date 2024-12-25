@@ -57,7 +57,7 @@ fn main() {
             grid::GridPlugin,
             pickups::PickupPlugin,
         ))
-        .insert_resource(ClearColor(Color::rgb_u8(1, 50, 45)))
+        .insert_resource(ClearColor(Color::srgb_u8(1, 50, 45)))
         .configure_sets(
             Update,
             (

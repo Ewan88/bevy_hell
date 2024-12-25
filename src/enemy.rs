@@ -8,7 +8,7 @@ use super::animation::{AnimationIndices, AnimationTimer};
 use super::assets::*;
 use super::player::*;
 use bevy::audio::Volume;
-use bevy::prelude::*;
+use bevy::{color, prelude::*};
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
@@ -104,7 +104,7 @@ fn spawn_enemies(
 
     let texture_handle = icon.blob.clone();
     let texture_atlas =
-        TextureAtlasLayout::from_grid(Vec2::new(32., 32.), 6, 1, None, None);
+        TextureAtlasLayout::from_grid(UVec2::new(32, 32), 6, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     let animation_indices = AnimationIndices { first: 1, last: 5 };
 
@@ -124,17 +124,16 @@ fn spawn_enemies(
                 random_point_within_radius(&mut rng, x_start, y_start);
             let transform =
                 Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.);
-
             (
-                SpriteSheetBundle {
+                SpriteBundle {
                     sprite: Sprite::default(),
-                    atlas: TextureAtlas {
-                        layout: texture_atlas_handle.clone(),
-                        index: 0,
-                    },
                     texture: texture_handle.clone(),
                     transform,
                     ..default()
+                },
+                TextureAtlas {
+                    layout: texture_atlas_handle.clone(),
+                    index: 0,
                 },
                 Enemy {
                     health: 10.,
@@ -258,7 +257,7 @@ fn color_change_cooldown(
     for (enemy, mut sprite) in enemy_query.iter_mut() {
         let diff = enemy.last_damage - time.elapsed_seconds_f64();
         if diff > -0.2 {
-            sprite.color = Color::GRAY;
+            sprite.color = Color::Srgba(color::palettes::basic::GRAY);
         } else if diff < -0.5 {
             sprite.color = Color::default();
         }

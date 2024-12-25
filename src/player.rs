@@ -1,6 +1,6 @@
 use crate::{assets::*, GameState};
 
-use bevy::prelude::*;
+use bevy::{color, prelude::*};
 
 #[derive(Component)]
 pub struct Player {
@@ -127,7 +127,7 @@ fn color_change_cooldown(
     if diff < -0.1 {
         sprite.color = Color::default();
     } else {
-        sprite.color = Color::RED;
+        sprite.color = Color::Srgba(color::palettes::basic::RED);
     }
 }
 
