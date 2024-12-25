@@ -103,7 +103,7 @@ fn spawn_attacks(
             AudioBundle {
                 source: audio.slash_attack.clone(),
                 settings: PlaybackSettings::ONCE
-                    .with_volume(Volume::new_relative(AUDIO_VOLUME)),
+                    .with_volume(Volume::new(AUDIO_VOLUME)),
             },
         ));
     }

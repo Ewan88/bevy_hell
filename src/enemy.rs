@@ -84,7 +84,7 @@ fn spawn_enemies(
     icon: Res<Images>,
     mut timer: ResMut<SpawnTimer>,
     time: Res<Time>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
     state: Res<State<GameState>>,
 ) {
     if *state != GameState::Running {
@@ -104,7 +104,7 @@ fn spawn_enemies(
 
     let texture_handle = icon.blob.clone();
     let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 32.), 6, 1, None, None);
+        TextureAtlasLayout::from_grid(Vec2::new(32., 32.), 6, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     let animation_indices = AnimationIndices { first: 1, last: 5 };
 
@@ -127,8 +127,12 @@ fn spawn_enemies(
 
             (
                 SpriteSheetBundle {
-                    texture_atlas: texture_atlas_handle.clone(),
-                    sprite: TextureAtlasSprite::new(animation_indices.first),
+                    sprite: Sprite::default(),
+                    atlas: TextureAtlas {
+                        layout: texture_atlas_handle.clone(),
+                        index: 0,
+                    },
+                    texture: texture_handle.clone(),
                     transform,
                     ..default()
                 },
@@ -148,7 +152,7 @@ fn spawn_enemies(
 
 fn enemy_movement(
     mut enemy_query: Query<
-        (&mut Transform, &mut Enemy, &mut TextureAtlasSprite),
+        (&mut Transform, &mut Enemy, &mut Sprite),
         (With<Enemy>, Without<Player>),
     >,
     player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
@@ -208,7 +212,7 @@ fn enemy_attack(
                     AudioBundle {
                         source: audio.health_down.clone(),
                         settings: PlaybackSettings::ONCE
-                            .with_volume(Volume::new_relative(AUDIO_VOLUME)),
+                            .with_volume(Volume::new(AUDIO_VOLUME)),
                     },
                     PlayerHitSound {
                         timer: Timer::from_seconds(5., TimerMode::Once),
@@ -248,7 +252,7 @@ fn despawn_enemies(
 }
 
 fn color_change_cooldown(
-    mut enemy_query: Query<(&Enemy, &mut TextureAtlasSprite), With<Enemy>>,
+    mut enemy_query: Query<(&Enemy, &mut Sprite), With<Enemy>>,
     time: Res<Time>,
 ) {
     for (enemy, mut sprite) in enemy_query.iter_mut() {

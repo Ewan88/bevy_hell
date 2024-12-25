@@ -9,14 +9,14 @@ impl Plugin for InputPlugin {
     }
 }
 
-const KEY_MAP: [KeyCode; 4] = [(KeyCode::W), (KeyCode::A), (KeyCode::S), (KeyCode::D)];
+const KEY_MAP: [KeyCode; 4] = [(KeyCode::KeyW), (KeyCode::KeyA), (KeyCode::KeyS), (KeyCode::KeyD)];
 
-fn key_pressed(input: &Res<Input<KeyCode>>, key_code: KeyCode) -> bool {
+fn key_pressed(input: &Res<ButtonInput<KeyCode>>, key_code: KeyCode) -> bool {
     input.pressed(key_code)
 }
 
 fn keyboard_input_system(
-    input: Res<Input<KeyCode>>,
+    input: Res<ButtonInput<KeyCode>>,
     mut player_query: Query<
         (&mut Transform, &mut Sprite),
         (With<Player>, Without<GameCamera>),

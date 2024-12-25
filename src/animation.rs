@@ -20,7 +20,7 @@ impl Plugin for AnimationPlugin {
 fn animate_sprites(
     time: Res<Time>,
     mut query: Query<(
-        &mut TextureAtlasSprite,
+        &mut TextureAtlas,
         &mut AnimationTimer,
         &AnimationIndices,
     )>,

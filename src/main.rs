@@ -67,7 +67,7 @@ fn main() {
                 DespawnSet.after(CollisionSet),
             ),
         )
-        .add_state::<GameState>()
+        .init_state::<GameState>()
         .run();
 }
 
