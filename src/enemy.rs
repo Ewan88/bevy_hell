@@ -4,7 +4,7 @@ use crate::{
     BASE_MOVE_SPEED,
 };
 
-use super::animation::{AnimationIndices, AnimationTimer};
+use super::animation::AnimationTimer;
 use super::assets::*;
 use super::player::*;
 use bevy::audio::Volume;
@@ -106,7 +106,6 @@ fn spawn_enemies(
     let texture_atlas =
         TextureAtlasLayout::from_grid(UVec2::new(32, 32), 6, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    let animation_indices = AnimationIndices { first: 1, last: 5 };
 
     if timer.countdown.finished() {
         let mut rng = SmallRng::from_entropy();
@@ -132,7 +131,6 @@ fn spawn_enemies(
                     health: 10.,
                     last_damage: 0.,
                 },
-                animation_indices.clone(),
                 AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             )
         }));
