@@ -19,20 +19,20 @@ impl Plugin for AnimationPlugin {
 
 fn animate_sprites(
     time: Res<Time>,
+    texture_atlases: Res<Assets<TextureAtlasLayout>>,
     mut query: Query<(
-        &mut TextureAtlas,
-        &mut AnimationTimer,
-        &AnimationIndices,
+        &mut Sprite,
+        &mut AnimationTimer
     )>,
 ) {
-    for (mut sprite, mut timer, indices) in query.iter_mut() {
+    for (mut sprite, mut timer) in query.iter_mut() {
         timer.tick(time.delta());
         if timer.just_finished() {
-            sprite.index = if sprite.index == indices.last {
-                indices.first
-            } else {
-                sprite.index + 1
+            let Some(atlas) = &mut sprite.texture_atlas else {
+                continue;
             };
+            let texture_atlas = texture_atlases.get(&atlas.layout).unwrap();
+            atlas.index = (atlas.index + 1) % texture_atlas.textures.len();
         }
     }
 }

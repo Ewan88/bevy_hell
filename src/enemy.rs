@@ -110,7 +110,7 @@ fn spawn_enemies(
 
     if timer.countdown.finished() {
         let mut rng = SmallRng::from_entropy();
-        let elapsed_time = time.elapsed_seconds();
+        let elapsed_time = time.elapsed_secs();
         let new_duration = (1. - elapsed_time / 120.).max(0.1);
         let min_spawns = (elapsed_time / 60.).ceil() as i32;
         let max_spawns = (elapsed_time / 30.).ceil() as i32;
@@ -118,23 +118,16 @@ fn spawn_enemies(
         let x_start = player_transform.translation.x;
         let y_start = player_transform.translation.y;
 
-        println!("spawns: {}", spawns);
         commands.spawn_batch((0..spawns).map(move |_| {
             let (x_offset, y_offset) =
                 random_point_within_radius(&mut rng, x_start, y_start);
-            let transform =
-                Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.);
             (
-                SpriteBundle {
-                    sprite: Sprite::default(),
-                    texture: texture_handle.clone(),
-                    transform,
+                Sprite {
+                    image: texture_handle.clone(),
+                    texture_atlas: Some(TextureAtlas::from(texture_atlas_handle.clone())),
                     ..default()
                 },
-                TextureAtlas {
-                    layout: texture_atlas_handle.clone(),
-                    index: 0,
-                },
+                Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.),
                 Enemy {
                     health: 10.,
                     last_damage: 0.,
@@ -162,7 +155,7 @@ fn enemy_movement(
     };
 
     for (mut transform, enemy, mut sprite) in enemy_query.iter_mut() {
-        let diff = enemy.last_damage - time.elapsed_seconds_f64();
+        let diff = enemy.last_damage - time.elapsed_secs_f64();
         if diff > -0.5 {
             continue;
         }
@@ -173,8 +166,8 @@ fn enemy_movement(
         );
         let direction = direction.normalize() * BASE_MOVE_SPEED;
 
-        transform.translation.x += direction.x * time.delta_seconds();
-        transform.translation.y += direction.y * time.delta_seconds();
+        transform.translation.x += direction.x * time.delta_secs();
+        transform.translation.y += direction.y * time.delta_secs();
 
         if transform.translation.x > player_transform.translation.x {
             sprite.flip_x = true;
@@ -208,18 +201,15 @@ fn enemy_attack(
         if distance.length() < 32. && attack_timer.countdown.finished() {
             if audio_query.is_empty() {
                 commands.spawn((
-                    AudioBundle {
-                        source: audio.health_down.clone(),
-                        settings: PlaybackSettings::ONCE
-                            .with_volume(Volume::new(AUDIO_VOLUME)),
-                    },
+                    AudioPlayer::<AudioSource>(audio.health_down.clone()),
+                    PlaybackSettings::ONCE.with_volume(Volume::new(AUDIO_VOLUME)),
                     PlayerHitSound {
                         timer: Timer::from_seconds(5., TimerMode::Once),
                     },
                 ));
             }
             player_struct.receive_damage();
-            player_struct.last_damage = time.elapsed_seconds_f64();
+            player_struct.last_damage = time.elapsed_secs_f64();
         }
     }
 }
@@ -241,7 +231,7 @@ fn despawn_enemies(
         if distance.length() > 4000. || distance.length() < -4000. {
             commands.entity(entity).despawn();
         } else if enemy.health <= 0. {
-            let diff = enemy.last_damage - time.elapsed_seconds_f64();
+            let diff = enemy.last_damage - time.elapsed_secs_f64();
             if diff < -0.5 {
                 player.gain_xp(25);
                 commands.entity(entity).despawn();
@@ -255,7 +245,7 @@ fn color_change_cooldown(
     time: Res<Time>,
 ) {
     for (enemy, mut sprite) in enemy_query.iter_mut() {
-        let diff = enemy.last_damage - time.elapsed_seconds_f64();
+        let diff = enemy.last_damage - time.elapsed_secs_f64();
         if diff > -0.2 {
             sprite.color = Color::Srgba(color::palettes::basic::GRAY);
         } else if diff < -0.5 {

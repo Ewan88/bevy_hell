@@ -27,17 +27,17 @@ fn keyboard_input_system(
         return;
     };
     if key_pressed(&input, KEY_MAP[0]) {
-        player_transform.translation.y += 1. * BASE_MOVE_SPEED * time.delta_seconds();
+        player_transform.translation.y += 1. * BASE_MOVE_SPEED * time.delta_secs();
     }
     if key_pressed(&input, KEY_MAP[1]) {
-        player_transform.translation.x -= 1. * BASE_MOVE_SPEED * time.delta_seconds();
+        player_transform.translation.x -= 1. * BASE_MOVE_SPEED * time.delta_secs();
         sprite.flip_x = true;
     }
     if key_pressed(&input, KEY_MAP[2]) {
-        player_transform.translation.y -= 1. * BASE_MOVE_SPEED * time.delta_seconds();
+        player_transform.translation.y -= 1. * BASE_MOVE_SPEED * time.delta_secs();
     }
     if key_pressed(&input, KEY_MAP[3]) {
-        player_transform.translation.x += 1. * BASE_MOVE_SPEED * time.delta_seconds();
+        player_transform.translation.x += 1. * BASE_MOVE_SPEED * time.delta_secs();
         sprite.flip_x = false;
     }
 }

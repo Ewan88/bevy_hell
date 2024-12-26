@@ -31,8 +31,8 @@ fn bullet_movement(
     mut bullet_query: Query<(&mut Transform, &Bullet), With<Bullet>>,
 ) {
     for (mut transform, bullet) in bullet_query.iter_mut() {
-        transform.translation.x += bullet.direction.x * 400. * time.delta_seconds();
-        transform.translation.y += bullet.direction.y * 400. * time.delta_seconds();
+        transform.translation.x += bullet.direction.x * 400. * time.delta_secs();
+        transform.translation.y += bullet.direction.y * 400. * time.delta_secs();
     }
 }
 

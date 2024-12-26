@@ -64,13 +64,9 @@ pub fn spawn_pickups(
         let (x_offset, y_offset) =
             random_point_within_radius(&mut rng, x_start, y_start);
 
-        let transform = Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.);
         commands.spawn((
-            SpriteBundle {
-                transform,
-                texture: texture_hanlde.clone(),
-                ..default()
-            },
+            Sprite::from_image(texture_hanlde.clone()),
+            Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.),
             Pickup,
         ));
     }

@@ -94,17 +94,14 @@ fn spawn_attacks(
         }
 
         commands.spawn((
-            SpriteBundle {
-                texture: icon.slash_attack.clone(),
-                transform: Transform::from_xyz(x, player_transform.translation.y, 0.0),
+            Sprite {
+                image: icon.slash_attack.clone(),
                 ..Default::default()
             },
+            Transform::from_xyz(x, player_transform.translation.y, 0.0),
             Attack::new(),
-            AudioBundle {
-                source: audio.slash_attack.clone(),
-                settings: PlaybackSettings::ONCE
-                    .with_volume(Volume::new(AUDIO_VOLUME)),
-            },
+            AudioPlayer::<AudioSource>(audio.slash_attack.clone()),
+            PlaybackSettings::ONCE.with_volume(Volume::new(AUDIO_VOLUME)),
         ));
     }
 }
@@ -135,7 +132,7 @@ fn attack_collision(
                 < 50.
             {
                 enemy.receive_damage(10.);
-                enemy.last_damage = time.elapsed_seconds_f64();
+                enemy.last_damage = time.elapsed_secs_f64();
             }
         }
     }

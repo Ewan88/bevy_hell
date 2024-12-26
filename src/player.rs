@@ -58,11 +58,8 @@ impl Plugin for PlayerPlugin {
 
 fn setup_player(mut commands: Commands, icons: Res<Images>) {
     commands.spawn((
-        SpriteBundle {
-            texture: icons.samurai.clone(),
-            transform: Transform::from_xyz(0., 0., 1.),
-            ..Default::default()
-        },
+        Sprite::from_image(icons.samurai.clone()),
+        Transform::from_xyz(0., 0., 1.),
         Player::new(),
     ));
 }
@@ -98,7 +95,7 @@ fn damage_audio_cooldown(
         return;
     }
 
-    let diff = player.last_damage - time.elapsed_seconds_f64();
+    let diff = player.last_damage - time.elapsed_secs_f64();
 
     if diff < -0.001 {
         sound.timer.tick(time.delta());
@@ -122,7 +119,7 @@ fn color_change_cooldown(
         return;
     }
 
-    let diff = player.last_damage - time.elapsed_seconds_f64();
+    let diff = player.last_damage - time.elapsed_secs_f64();
 
     if diff < -0.1 {
         sprite.color = Color::default();

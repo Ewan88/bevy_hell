@@ -38,8 +38,7 @@ impl Plugin for UIPlugin {
 
 fn build_ui(mut commands: Commands) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
+        .spawn(Node {
                 width: Val::Percent(95.0),
                 height: Val::Percent(95.0),
                 flex_direction: FlexDirection::Column,
@@ -47,13 +46,11 @@ fn build_ui(mut commands: Commands) {
                 align_items: AlignItems::Center,
                 align_self: AlignSelf::Center,
                 ..default()
-            },
-            ..default()
-        })
+            }
+        )
         .with_children(|parent| {
-            parent.spawn((TextBundle::from_section("", TextStyle::default()), TimeText));
-            parent.spawn(NodeBundle {
-                style: Style {
+            parent.spawn((Text::new(""), TimeText));
+            parent.spawn((Node {
                     left: Val::Percent(0.),
                     top: Val::Percent(-5.),
                     width: Val::Percent(110.0),
@@ -61,36 +58,32 @@ fn build_ui(mut commands: Commands) {
                     position_type: PositionType::Absolute,
                     ..default()
                 },
-                background_color: Color::srgba(0., 0., 0., 0.5).into(),
-                ..default()
-            });
+                BackgroundColor::from(Color::srgba(0., 0., 0., 0.5)),
+            ));
             parent
-                .spawn(NodeBundle {
-                    style: Style {
+                .spawn(Node {
                         width: Val::Percent(95.0),
                         justify_content: JustifyContent::SpaceBetween,
                         justify_items: JustifyItems::Stretch,
                         align_self: AlignSelf::Center,
                         ..default()
-                    },
-                    ..default()
-                })
+                    }
+                )
                 .with_children(|parent| {
                     parent.spawn((
-                        TextBundle::from_section("", TextStyle::default()),
+                        Text::new(""),
                         PlayerHealth,
                     ));
                     parent.spawn((
-                        TextBundle::from_section("", TextStyle::default()),
+                        Text::new(""),
                         XPText,
                     ));
                     parent.spawn((
-                        TextBundle::from_section("", TextStyle::default()),
+                        Text::new(""),
                         LevelText,
                     ));
                 });
-            parent.spawn(NodeBundle {
-                style: Style {
+            parent.spawn((Node {
                     width: Val::Percent(110.),
                     height: Val::Percent(10.),
                     left: Val::Percent(0.),
@@ -98,26 +91,22 @@ fn build_ui(mut commands: Commands) {
                     position_type: PositionType::Absolute,
                     ..default()
                 },
-                background_color: Color::srgba(0., 0., 0., 0.5).into(),
-                ..default()
-            });
+                BackgroundColor::from(Color::srgba(0., 0., 0., 0.5)),
+            ));
         });
-}
+    }
 
 fn build_debugging_text(mut commands: Commands) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
+        .spawn(Node {
                 position_type: PositionType::Absolute,
                 left: Val::Percent(0.),
                 top: Val::Percent(7.5),
                 ..default()
-            },
-            ..default()
         })
         .with_children(|parent| {
             parent.spawn((
-                TextBundle::from_section("", TextStyle::default()),
+                Text::new(""),
                 PositionText,
             ));
         });
@@ -125,21 +114,19 @@ fn build_debugging_text(mut commands: Commands) {
 
 fn spawn_game_over_text(mut commands: Commands) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
+        .spawn((Node {
                 width: Val::Percent(100.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 ..default()
             },
-            background_color: Color::srgba(0., 0., 0., 0.5).into(),
-            ..default()
-        })
+            BackgroundColor::from(Color::srgba(0., 0. , 0., 0.5))
+        ))
         .with_children(|parent| {
-            parent.spawn(TextBundle::from_section(
-                "GAME OVER",
-                TextStyle {
+            parent.spawn((
+                TextSpan::new("GAME OVER"),
+                TextFont {
                     font_size: 100.,
                     ..default()
                 },
@@ -160,7 +147,7 @@ fn update_health(
     };
 
     let health = std::cmp::max(player.health as i32, 0);
-    health_text.sections[0].value = format!("Health: {}", health);
+    **health_text = format!("Health: {}", health);
 }
 
 fn update_xp(player_query: Query<&Player>, mut xp_query: Query<&mut Text, With<XPText>>) {
@@ -172,7 +159,7 @@ fn update_xp(player_query: Query<&Player>, mut xp_query: Query<&mut Text, With<X
         return;
     };
 
-    xp_text.sections[0].value = format!("XP: {} / {}", player.xp, player.next_level);
+    **xp_text = format!("XP: {} / {}", player.xp, player.next_level);
 }
 
 fn update_level(
@@ -187,7 +174,7 @@ fn update_level(
         return;
     };
 
-    level_text.sections[0].value = format!("Level: {}", player.level);
+    **level_text = format!("Level: {}", player.level);
 }
 
 fn update_time(time: Res<Time>, mut time_query: Query<&mut Text, With<TimeText>>) {
@@ -195,11 +182,11 @@ fn update_time(time: Res<Time>, mut time_query: Query<&mut Text, With<TimeText>>
         return;
     };
 
-    let total_seconds = time.elapsed_seconds_f64().round() as u32;
+    let total_seconds = time.elapsed_secs_f64().round() as u32;
     let minutes = total_seconds / 60;
     let seconds = total_seconds % 60;
 
-    time_text.sections[0].value = format!("Time: {:02}:{:02}", minutes, seconds);
+    **time_text = format!("Time: {:02}:{:02}", minutes, seconds);
 }
 
 fn update_position_text(
@@ -214,7 +201,7 @@ fn update_position_text(
         return;
     };
 
-    text.sections[0].value = format!(
+    **text = format!(
         "{:.2} {:.2}",
         transform.translation.x, transform.translation.y
     );
