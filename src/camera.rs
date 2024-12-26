@@ -15,7 +15,7 @@ impl Plugin for CameraPlugin {
 }
 
 fn setup(mut commands: Commands) {
-    commands.spawn((Camera2d::default(), GameCamera));
+    commands.spawn((Camera2d, GameCamera));
 }
 
 fn move_camera(

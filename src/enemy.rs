@@ -167,11 +167,7 @@ fn enemy_movement(
         transform.translation.x += direction.x * time.delta_secs();
         transform.translation.y += direction.y * time.delta_secs();
 
-        if transform.translation.x > player_transform.translation.x {
-            sprite.flip_x = true;
-        } else {
-            sprite.flip_x = false;
-        }
+        sprite.flip_x = transform.translation.x > player_transform.translation.x;
     }
 }
 
