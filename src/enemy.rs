@@ -136,7 +136,6 @@ fn spawn_enemies(
         }));
 
         timer.countdown = Timer::from_seconds(new_duration, TimerMode::Repeating);
-        println!("new duration: {}", new_duration)
     }
 }
 

@@ -10,6 +10,7 @@ mod map;
 mod pickups;
 mod player;
 mod ui;
+mod debug;
 
 use std::f32::consts::PI;
 
@@ -56,6 +57,7 @@ fn main() {
             ui::UIPlugin,
             grid::GridPlugin,
             pickups::PickupPlugin,
+            debug::DebugPlugin,
         ))
         .insert_resource(ClearColor(Color::srgb_u8(1, 50, 45)))
         .configure_sets(

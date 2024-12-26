@@ -14,14 +14,11 @@ pub struct LevelText;
 #[derive(Component)]
 pub struct TimeText;
 
-#[derive(Component)]
-pub struct PositionText;
-
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, (build_ui, build_debugging_text))
+        app.add_systems(PostStartup, build_ui)
             .add_systems(
                 Update,
                 (
@@ -29,7 +26,6 @@ impl Plugin for UIPlugin {
                     update_xp,
                     update_level,
                     update_time,
-                    update_position_text,
                 ),
             );
         app.add_systems(OnEnter(GameState::GameOver), spawn_game_over_text);
@@ -95,22 +91,6 @@ fn build_ui(mut commands: Commands) {
             ));
         });
     }
-
-fn build_debugging_text(mut commands: Commands) {
-    commands
-        .spawn(Node {
-                position_type: PositionType::Absolute,
-                left: Val::Percent(0.),
-                top: Val::Percent(7.5),
-                ..default()
-        })
-        .with_children(|parent| {
-            parent.spawn((
-                Text::new(""),
-                PositionText,
-            ));
-        });
-}
 
 fn spawn_game_over_text(mut commands: Commands) {
     commands
@@ -187,22 +167,4 @@ fn update_time(time: Res<Time>, mut time_query: Query<&mut Text, With<TimeText>>
     let seconds = total_seconds % 60;
 
     **time_text = format!("Time: {:02}:{:02}", minutes, seconds);
-}
-
-fn update_position_text(
-    mut text_query: Query<&mut Text, With<PositionText>>,
-    player_query: Query<&Transform, With<Player>>,
-) {
-    let Ok(transform) = player_query.get_single() else {
-        return;
-    };
-
-    let Ok(mut text) = text_query.get_single_mut() else {
-        return;
-    };
-
-    **text = format!(
-        "{:.2} {:.2}",
-        transform.translation.x, transform.translation.y
-    );
 }
