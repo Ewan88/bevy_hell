@@ -20,6 +20,7 @@ impl Plugin for PlayerPlugin {
                     color_change_cooldown.run_if(in_state(GameState::Running)),
                     gain_level.run_if(in_state(GameState::Running)),
                 ),
-            );
+            )
+            .add_systems(OnEnter(GameState::Paused), spawn_levelup_menu);
     }
 }
