@@ -18,16 +18,10 @@ pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, build_ui)
-            .add_systems(
-                Update,
-                (
-                    update_health,
-                    update_xp,
-                    update_level,
-                    update_time,
-                ),
-            );
+        app.add_systems(PostStartup, build_ui).add_systems(
+            Update,
+            (update_health, update_xp, update_level, update_time),
+        );
         app.add_systems(OnEnter(GameState::GameOver), spawn_game_over_text);
     }
 }
@@ -35,18 +29,18 @@ impl Plugin for UIPlugin {
 fn build_ui(mut commands: Commands) {
     commands
         .spawn(Node {
-                width: Val::Percent(95.0),
-                height: Val::Percent(95.0),
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::SpaceBetween,
-                align_items: AlignItems::Center,
-                align_self: AlignSelf::Center,
-                ..default()
-            }
-        )
+            width: Val::Percent(95.0),
+            height: Val::Percent(95.0),
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::SpaceBetween,
+            align_items: AlignItems::Center,
+            align_self: AlignSelf::Center,
+            ..default()
+        })
         .with_children(|parent| {
             parent.spawn((Text::new(""), TimeText));
-            parent.spawn((Node {
+            parent.spawn((
+                Node {
                     left: Val::Percent(0.),
                     top: Val::Percent(-5.),
                     width: Val::Percent(110.0),
@@ -58,28 +52,19 @@ fn build_ui(mut commands: Commands) {
             ));
             parent
                 .spawn(Node {
-                        width: Val::Percent(95.0),
-                        justify_content: JustifyContent::SpaceBetween,
-                        justify_items: JustifyItems::Stretch,
-                        align_self: AlignSelf::Center,
-                        ..default()
-                    }
-                )
+                    width: Val::Percent(95.0),
+                    justify_content: JustifyContent::SpaceBetween,
+                    justify_items: JustifyItems::Stretch,
+                    align_self: AlignSelf::Center,
+                    ..default()
+                })
                 .with_children(|parent| {
-                    parent.spawn((
-                        Text::new(""),
-                        PlayerHealth,
-                    ));
-                    parent.spawn((
-                        Text::new(""),
-                        XPText,
-                    ));
-                    parent.spawn((
-                        Text::new(""),
-                        LevelText,
-                    ));
+                    parent.spawn((Text::new(""), PlayerHealth));
+                    parent.spawn((Text::new(""), XPText));
+                    parent.spawn((Text::new(""), LevelText));
                 });
-            parent.spawn((Node {
+            parent.spawn((
+                Node {
                     width: Val::Percent(110.),
                     height: Val::Percent(10.),
                     left: Val::Percent(0.),
@@ -90,22 +75,23 @@ fn build_ui(mut commands: Commands) {
                 BackgroundColor::from(Color::srgba(0., 0., 0., 0.5)),
             ));
         });
-    }
+}
 
 fn spawn_game_over_text(mut commands: Commands) {
     commands
-        .spawn((Node {
+        .spawn((
+            Node {
                 width: Val::Percent(100.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 ..default()
             },
-            BackgroundColor::from(Color::srgba(0., 0. , 0., 0.5))
+            BackgroundColor::from(Color::srgba(0., 0., 0., 0.5)),
         ))
         .with_children(|parent| {
             parent.spawn((
-                TextSpan::new("GAME OVER"),
+                Text::new("GAME OVER"),
                 TextFont {
                     font_size: 100.,
                     ..default()
