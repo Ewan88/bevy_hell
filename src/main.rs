@@ -5,7 +5,6 @@ mod bullet;
 mod camera;
 mod debug;
 mod enemy;
-mod grid;
 mod input;
 mod map;
 mod pickups;
@@ -55,7 +54,6 @@ fn main() {
             attacks::AttackPlugin,
             animation::AnimationPlugin,
             ui::UIPlugin,
-            grid::GridPlugin,
             pickups::PickupPlugin,
             debug::DebugPlugin,
         ))

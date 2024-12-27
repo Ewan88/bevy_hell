@@ -2,7 +2,7 @@ use bevy::{audio::Volume, prelude::*};
 
 use crate::{
     assets::{Audio, Images},
-    enemy::Enemy,
+    enemy::components::Enemy,
     player::components::Player,
     CollisionSet, DespawnSet, AUDIO_VOLUME,
 };

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::enemy::Enemy;
+use crate::enemy::components::Enemy;
 
 #[derive(Component)]
 pub struct Bullet {
