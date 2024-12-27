@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 
 use crate::{
-    assets::Images, player::Player, random_point_within_radius, CollisionSet, GameState,
-    SpawnSet,
+    assets::Images, player::components::Player, random_point_within_radius, CollisionSet,
+    GameState, SpawnSet,
 };
 
 #[derive(Component)]
@@ -61,8 +61,7 @@ pub fn spawn_pickups(
 
         let x_start = player_transform.translation.x;
         let y_start = player_transform.translation.y;
-        let (x_offset, y_offset) =
-            random_point_within_radius(&mut rng, x_start, y_start);
+        let (x_offset, y_offset) = random_point_within_radius(&mut rng, x_start, y_start);
 
         commands.spawn((
             Sprite::from_image(texture_hanlde.clone()),
@@ -87,7 +86,7 @@ pub fn pickup_collision(
             player_transform.translation.y - transform.translation.y,
         );
         if distance.length() <= 32. {
-            player.health = (player.health +25.).min(player.max_health);
+            player.health = (player.health + 25.).min(player.max_health);
             commands.entity(entity).despawn();
         }
     }

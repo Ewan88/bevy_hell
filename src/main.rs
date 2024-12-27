@@ -3,6 +3,7 @@ mod assets;
 mod attacks;
 mod bullet;
 mod camera;
+mod debug;
 mod enemy;
 mod grid;
 mod input;
@@ -10,7 +11,6 @@ mod map;
 mod pickups;
 mod player;
 mod ui;
-mod debug;
 
 use std::f32::consts::PI;
 

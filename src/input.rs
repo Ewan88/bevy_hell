@@ -1,4 +1,4 @@
-use crate::{camera::GameCamera, player::Player, BASE_MOVE_SPEED};
+use crate::{camera::GameCamera, player::components::Player, BASE_MOVE_SPEED};
 use bevy::prelude::*;
 
 pub struct InputPlugin;
@@ -9,7 +9,12 @@ impl Plugin for InputPlugin {
     }
 }
 
-const KEY_MAP: [KeyCode; 4] = [(KeyCode::KeyW), (KeyCode::KeyA), (KeyCode::KeyS), (KeyCode::KeyD)];
+const KEY_MAP: [KeyCode; 4] = [
+    (KeyCode::KeyW),
+    (KeyCode::KeyA),
+    (KeyCode::KeyS),
+    (KeyCode::KeyD),
+];
 
 fn key_pressed(input: &Res<ButtonInput<KeyCode>>, key_code: KeyCode) -> bool {
     input.pressed(key_code)

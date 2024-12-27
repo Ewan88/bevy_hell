@@ -6,7 +6,7 @@ use crate::{
 
 use super::animation::AnimationTimer;
 use super::assets::*;
-use super::player::*;
+use super::player::components::*;
 use bevy::audio::Volume;
 use bevy::{color, prelude::*};
 use rand::rngs::SmallRng;

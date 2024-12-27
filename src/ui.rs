@@ -1,4 +1,4 @@
-use crate::{player::*, GameState};
+use crate::{player::components::Player, GameState};
 
 use bevy::prelude::*;
 

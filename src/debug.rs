@@ -1,7 +1,7 @@
-use sysinfo::System;
 use bevy::{color, prelude::*};
+use sysinfo::System;
 
-use crate::player::Player;
+use crate::player::components::Player;
 
 #[derive(Component)]
 pub struct DebugText;
@@ -15,10 +15,9 @@ pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_systems(Startup, init_system_info)
-        .add_systems(PostStartup, build_debug_text)
-        .add_systems(Update, update_debug_text);
+        app.add_systems(Startup, init_system_info)
+            .add_systems(PostStartup, build_debug_text)
+            .add_systems(Update, update_debug_text);
     }
 }
 
@@ -31,10 +30,10 @@ fn init_system_info(mut commands: Commands) {
 fn build_debug_text(mut commands: Commands) {
     commands
         .spawn(Node {
-                position_type: PositionType::Absolute,
-                left: Val::Percent(0.),
-                top: Val::Percent(7.5),
-                ..default()
+            position_type: PositionType::Absolute,
+            left: Val::Percent(0.),
+            top: Val::Percent(7.5),
+            ..default()
         })
         .with_children(|parent| {
             parent.spawn((
@@ -74,7 +73,8 @@ fn update_debug_text(
         {}/{}\n
         {}%
         ",
-        transform.translation.x, transform.translation.y,
+        transform.translation.x,
+        transform.translation.y,
         memory_used,
         memory_total,
         cpu_usage
