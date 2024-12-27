@@ -12,6 +12,7 @@ pub struct Images {
 pub struct Audio {
     pub health_down: Handle<AudioSource>,
     pub slash_attack: Handle<AudioSource>,
+    pub background_bleeps: Handle<AudioSource>,
 }
 
 #[derive(Component)]
@@ -41,5 +42,6 @@ fn setup_audio(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(Audio {
         health_down: asset_server.load("health_down.ogg"),
         slash_attack: asset_server.load("slash_attack.ogg"),
+        background_bleeps: asset_server.load("background_bleeps.ogg"),
     });
 }

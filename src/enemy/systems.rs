@@ -131,7 +131,7 @@ pub fn enemy_attack(
             if audio_query.is_empty() {
                 commands.spawn((
                     AudioPlayer::<AudioSource>(audio.health_down.clone()),
-                    PlaybackSettings::ONCE.with_volume(Volume::new(AUDIO_VOLUME)),
+                    PlaybackSettings::ONCE.with_volume(Volume::new(AUDIO_VOLUME / 2.)),
                     PlayerHitSound {
                         timer: Timer::from_seconds(5., TimerMode::Once),
                     },

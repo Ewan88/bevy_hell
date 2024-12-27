@@ -13,7 +13,8 @@ mod ui;
 
 use std::f32::consts::PI;
 
-use bevy::prelude::*;
+use assets::Audio;
+use bevy::{audio::Volume, prelude::*};
 use rand::{rngs::SmallRng, Rng};
 
 pub const SCREEN_WIDTH: f32 = 1280.;
@@ -72,11 +73,19 @@ fn main() {
         )
         .init_state::<GameState>()
         .add_systems(Startup, run_game)
+        .add_systems(PostStartup, play_background_audio)
         .run();
 }
 
 fn run_game(mut game_state: ResMut<NextState<GameState>>) {
     game_state.set(GameState::Running);
+}
+
+fn play_background_audio(mut commands: Commands, audio: Res<Audio>) {
+    commands.spawn((
+        AudioPlayer::<AudioSource>(audio.background_bleeps.clone()),
+        PlaybackSettings::LOOP.with_volume(Volume::new(AUDIO_VOLUME)),
+    ));
 }
 
 pub fn random_point_within_radius(
