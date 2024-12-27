@@ -22,9 +22,12 @@ pub const AUDIO_VOLUME: f32 = 0.5;
 
 pub const BASE_MOVE_SPEED: f32 = 100.;
 
-#[derive(SystemSet, States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
+#[derive(
+    SystemSet, States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default, Reflect,
+)]
 pub enum GameState {
     #[default]
+    Loading,
     Running,
     GameOver,
 }
@@ -68,7 +71,12 @@ fn main() {
             ),
         )
         .init_state::<GameState>()
+        .add_systems(Startup, run_game)
         .run();
+}
+
+fn run_game(mut game_state: ResMut<NextState<GameState>>) {
+    game_state.set(GameState::Running);
 }
 
 pub fn random_point_within_radius(

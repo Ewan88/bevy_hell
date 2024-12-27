@@ -1,4 +1,4 @@
-use crate::{player::components::Player, GameState};
+use crate::{enemy::components::Enemy, player::components::Player, GameState};
 
 use bevy::prelude::*;
 
@@ -14,13 +14,22 @@ pub struct LevelText;
 #[derive(Component)]
 pub struct TimeText;
 
+#[derive(Component)]
+pub struct GameOverText;
+
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, build_ui).add_systems(
             Update,
-            (update_health, update_xp, update_level, update_time),
+            (
+                update_health,
+                update_xp,
+                update_level,
+                update_time,
+                listen_for_restart.run_if(in_state(GameState::GameOver)),
+            ),
         );
         app.add_systems(OnEnter(GameState::GameOver), spawn_game_over_text);
     }
@@ -85,9 +94,11 @@ fn spawn_game_over_text(mut commands: Commands) {
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
             BackgroundColor::from(Color::srgba(0., 0., 0., 0.5)),
+            GameOverText,
         ))
         .with_children(|parent| {
             parent.spawn((
@@ -97,7 +108,32 @@ fn spawn_game_over_text(mut commands: Commands) {
                     ..default()
                 },
             ));
+            parent.spawn((
+                Text::new("Press 'R' to restart"),
+                TextFont {
+                    font_size: 25.,
+                    ..default()
+                },
+            ));
         });
+}
+
+fn listen_for_restart(
+    mut commands: Commands,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut game_state: ResMut<NextState<GameState>>,
+    enemy_query: Query<(Entity, &Enemy), With<Enemy>>,
+    text_query: Query<Entity, With<GameOverText>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::KeyR) {
+        for enemy in enemy_query.iter() {
+            commands.entity(enemy.0).despawn_recursive();
+        }
+        for text in text_query.iter() {
+            commands.entity(text).despawn_recursive();
+        }
+        game_state.set(GameState::Running);
+    }
 }
 
 fn update_health(

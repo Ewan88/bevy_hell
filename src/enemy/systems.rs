@@ -1,7 +1,7 @@
 use super::components::*;
 use crate::random_point_within_radius;
 use crate::{
-    animation::AnimationTimer, assets::*, player::components::*, GameState, AUDIO_VOLUME,
+    animation::AnimationTimer, assets::*, player::components::*, AUDIO_VOLUME,
     BASE_MOVE_SPEED,
 };
 
@@ -26,11 +26,10 @@ pub fn spawn_enemies(
     mut timer: ResMut<SpawnTimer>,
     time: Res<Time>,
     mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
-    state: Res<State<GameState>>,
 ) {
-    if *state != GameState::Running {
+    let Ok(&player_transform) = player_query.get_single() else {
         return;
-    }
+    };
 
     let enemy_count = enemy_query.iter().count();
     if enemy_count > 10000 {
@@ -38,10 +37,6 @@ pub fn spawn_enemies(
     }
 
     timer.countdown.tick(time.delta());
-
-    let Ok(&player_transform) = player_query.get_single() else {
-        return;
-    };
 
     let texture_handle = icon.blob.clone();
     let texture_atlas =
