@@ -33,8 +33,12 @@ impl Plugin for PickupPlugin {
         app.insert_resource(SpawnTimer::new()).add_systems(
             Update,
             (
-                spawn_pickups.in_set(SpawnSet),
-                pickup_collision.in_set(CollisionSet),
+                spawn_pickups
+                    .in_set(SpawnSet)
+                    .run_if(in_state(GameState::Running)),
+                pickup_collision
+                    .in_set(CollisionSet)
+                    .run_if(in_state(GameState::Running)),
             ),
         );
     }

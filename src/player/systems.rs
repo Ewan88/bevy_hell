@@ -2,7 +2,15 @@ use super::components::*;
 use crate::{assets::*, GameState};
 use bevy::{color, prelude::*};
 
-pub fn setup_player(mut commands: Commands, icons: Res<Images>) {
+pub fn setup_player(
+    mut commands: Commands,
+    icons: Res<Images>,
+    player_query: Query<&Player>,
+) {
+    if player_query.iter().count() > 0 {
+        return;
+    }
+
     commands.spawn((
         Sprite::from_image(icons.samurai.clone()),
         Transform::from_xyz(0., 0., 1.),
@@ -71,16 +79,5 @@ pub fn color_change_cooldown(
         sprite.color = Color::default();
     } else {
         sprite.color = Color::Srgba(color::palettes::basic::RED);
-    }
-}
-
-pub fn gain_level(mut player_query: Query<&mut Player>) {
-    let Ok(mut player) = player_query.get_single_mut() else {
-        return;
-    };
-
-    if player.xp > player.next_level {
-        player.level += 1;
-        player.next_level = player.xp_to_next_level();
     }
 }

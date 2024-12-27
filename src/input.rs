@@ -1,11 +1,11 @@
-use crate::{camera::GameCamera, player::components::Player, BASE_MOVE_SPEED};
+use crate::{camera::GameCamera, player::components::Player, GameState, BASE_MOVE_SPEED};
 use bevy::prelude::*;
 
 pub struct InputPlugin;
 
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, keyboard_input_system);
+        app.add_systems(Update, move_player.run_if(in_state(GameState::Running)));
     }
 }
 
@@ -20,7 +20,7 @@ fn key_pressed(input: &Res<ButtonInput<KeyCode>>, key_code: KeyCode) -> bool {
     input.pressed(key_code)
 }
 
-fn keyboard_input_system(
+fn move_player(
     input: Res<ButtonInput<KeyCode>>,
     mut player_query: Query<
         (&mut Transform, &mut Sprite),

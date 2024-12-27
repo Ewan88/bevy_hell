@@ -15,7 +15,9 @@ use std::f32::consts::PI;
 
 use assets::Audio;
 use bevy::{audio::Volume, prelude::*};
+use enemy::components::Enemy;
 use rand::{rngs::SmallRng, Rng};
+use ui::GameOverText;
 
 pub const SCREEN_WIDTH: f32 = 1280.;
 pub const SCREEN_HEIGHT: f32 = 720.;
@@ -31,6 +33,7 @@ pub enum GameState {
     Loading,
     Running,
     GameOver,
+    Paused,
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
@@ -74,6 +77,10 @@ fn main() {
         .init_state::<GameState>()
         .add_systems(Startup, run_game)
         .add_systems(PostStartup, play_background_audio)
+        .add_systems(
+            Update,
+            listen_for_restart.run_if(in_state(GameState::GameOver)),
+        )
         .run();
 }
 
@@ -86,6 +93,24 @@ fn play_background_audio(mut commands: Commands, audio: Res<Audio>) {
         AudioPlayer::<AudioSource>(audio.background_bleeps.clone()),
         PlaybackSettings::LOOP.with_volume(Volume::new(AUDIO_VOLUME)),
     ));
+}
+
+fn listen_for_restart(
+    mut commands: Commands,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut game_state: ResMut<NextState<GameState>>,
+    enemy_query: Query<(Entity, &Enemy), With<Enemy>>,
+    text_query: Query<Entity, With<GameOverText>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::KeyR) {
+        for enemy in enemy_query.iter() {
+            commands.entity(enemy.0).despawn_recursive();
+        }
+        for text in text_query.iter() {
+            commands.entity(text).despawn_recursive();
+        }
+        game_state.set(GameState::Running);
+    }
 }
 
 pub fn random_point_within_radius(

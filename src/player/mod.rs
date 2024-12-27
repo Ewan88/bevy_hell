@@ -1,6 +1,8 @@
 pub mod components;
+mod levelup;
 pub mod systems;
 use bevy::prelude::*;
+use levelup::*;
 use systems::*;
 
 use crate::GameState;
@@ -13,10 +15,10 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 Update,
                 (
-                    kill_player,
-                    damage_audio_cooldown,
-                    color_change_cooldown,
-                    gain_level,
+                    kill_player.run_if(in_state(GameState::Running)),
+                    damage_audio_cooldown.run_if(in_state(GameState::Running)),
+                    color_change_cooldown.run_if(in_state(GameState::Running)),
+                    gain_level.run_if(in_state(GameState::Running)),
                 ),
             );
     }

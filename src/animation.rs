@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::GameState;
+
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(pub Timer);
 
@@ -7,17 +9,14 @@ pub struct AnimationPlugin;
 
 impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, animate_sprites);
+        app.add_systems(Update, animate_sprites.run_if(in_state(GameState::Running)));
     }
 }
 
 fn animate_sprites(
     time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlasLayout>>,
-    mut query: Query<(
-        &mut Sprite,
-        &mut AnimationTimer
-    )>,
+    mut query: Query<(&mut Sprite, &mut AnimationTimer)>,
 ) {
     for (mut sprite, mut timer) in query.iter_mut() {
         timer.tick(time.delta());

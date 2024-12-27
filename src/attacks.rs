@@ -4,7 +4,7 @@ use crate::{
     assets::{Audio, Images},
     enemy::components::Enemy,
     player::components::Player,
-    CollisionSet, DespawnSet, AUDIO_VOLUME,
+    CollisionSet, DespawnSet, GameState, SpawnSet, AUDIO_VOLUME,
 };
 
 #[derive(Component)]
@@ -27,9 +27,15 @@ impl Plugin for AttackPlugin {
         app.add_systems(PostStartup, setup_spawn_timer).add_systems(
             Update,
             (
-                spawn_attacks,
-                attack_lifetime.in_set(DespawnSet),
-                attack_collision.in_set(CollisionSet),
+                spawn_attacks
+                    .in_set(SpawnSet)
+                    .run_if(in_state(GameState::Running)),
+                attack_lifetime
+                    .in_set(DespawnSet)
+                    .run_if(in_state(GameState::Running)),
+                attack_collision
+                    .in_set(CollisionSet)
+                    .run_if(in_state(GameState::Running)),
             ),
         );
     }

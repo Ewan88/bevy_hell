@@ -23,13 +23,7 @@ impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, build_ui).add_systems(
             Update,
-            (
-                update_health,
-                update_xp,
-                update_level,
-                update_time,
-                listen_for_restart.run_if(in_state(GameState::GameOver)),
-            ),
+            (update_health, update_xp, update_level, update_time),
         );
         app.add_systems(OnEnter(GameState::GameOver), spawn_game_over_text);
     }
@@ -116,24 +110,6 @@ fn spawn_game_over_text(mut commands: Commands) {
                 },
             ));
         });
-}
-
-fn listen_for_restart(
-    mut commands: Commands,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut game_state: ResMut<NextState<GameState>>,
-    enemy_query: Query<(Entity, &Enemy), With<Enemy>>,
-    text_query: Query<Entity, With<GameOverText>>,
-) {
-    if keyboard_input.just_pressed(KeyCode::KeyR) {
-        for enemy in enemy_query.iter() {
-            commands.entity(enemy.0).despawn_recursive();
-        }
-        for text in text_query.iter() {
-            commands.entity(text).despawn_recursive();
-        }
-        game_state.set(GameState::Running);
-    }
 }
 
 fn update_health(
