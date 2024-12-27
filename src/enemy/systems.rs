@@ -93,6 +93,18 @@ pub fn enemy_movement(
             continue;
         }
 
+        let mut rng = SmallRng::from_entropy();
+        let chance = rng.gen_range(1..100);
+
+        if chance <= 10 {
+            continue;
+        } else if chance <= 25 {
+            let x_offset = rng.gen_range(-1.0..1.0);
+            let y_offset = rng.gen_range(-1.0..1.0);
+            transform.translation.x += x_offset * BASE_MOVE_SPEED * time.delta_secs();
+            transform.translation.y += y_offset * BASE_MOVE_SPEED * time.delta_secs();
+        }
+
         let direction = Vec2::new(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
