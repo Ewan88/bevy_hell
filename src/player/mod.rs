@@ -2,6 +2,7 @@ pub mod components;
 mod levelup;
 pub mod systems;
 use bevy::prelude::*;
+use components::Player;
 use levelup::*;
 use systems::*;
 
@@ -15,12 +16,26 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 Update,
                 (
-                    kill_player.run_if(in_state(GameState::Running)),
-                    damage_audio_cooldown.run_if(in_state(GameState::Running)),
-                    color_change_cooldown.run_if(in_state(GameState::Running)),
-                    gain_level.run_if(in_state(GameState::Running)),
-                ),
+                    kill_player,
+                    damage_audio_cooldown,
+                    color_change_cooldown,
+                    gain_level,
+                    dirty_xp,
+                )
+                    .run_if(in_state(GameState::Running)),
             )
-            .add_systems(OnEnter(GameState::Paused), spawn_levelup_menu);
+            .add_systems(OnEnter(GameState::Paused), spawn_levelup_menu)
+            .add_systems(Update, menu_action.run_if(in_state(GameState::Paused)))
+            .add_systems(OnExit(GameState::Paused), despawn_menu);
+    }
+}
+
+fn dirty_xp(input: Res<ButtonInput<KeyCode>>, mut player_query: Query<&mut Player>) {
+    let Ok(mut player) = player_query.get_single_mut() else {
+        return;
+    };
+
+    if input.pressed(KeyCode::NumpadAdd) {
+        player.xp += 100;
     }
 }

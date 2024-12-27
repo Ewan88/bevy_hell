@@ -9,40 +9,34 @@ impl Plugin for InputPlugin {
     }
 }
 
-const KEY_MAP: [KeyCode; 4] = [
-    (KeyCode::KeyW),
-    (KeyCode::KeyA),
-    (KeyCode::KeyS),
-    (KeyCode::KeyD),
-];
-
-fn key_pressed(input: &Res<ButtonInput<KeyCode>>, key_code: KeyCode) -> bool {
-    input.pressed(key_code)
-}
-
 fn move_player(
     input: Res<ButtonInput<KeyCode>>,
     mut player_query: Query<
-        (&mut Transform, &mut Sprite),
+        (&mut Transform, &mut Sprite, &Player),
         (With<Player>, Without<GameCamera>),
     >,
     time: Res<Time>,
 ) {
-    let Ok((mut player_transform, mut sprite)) = player_query.get_single_mut() else {
+    let Ok((mut player_transform, mut sprite, player)) = player_query.get_single_mut()
+    else {
         return;
     };
-    if key_pressed(&input, KEY_MAP[0]) {
-        player_transform.translation.y += 1. * BASE_MOVE_SPEED * time.delta_secs();
+    if input.pressed(KeyCode::KeyW) || input.pressed(KeyCode::ArrowUp) {
+        player_transform.translation.y +=
+            1. * (BASE_MOVE_SPEED + player.movement_speed_mod) * time.delta_secs();
     }
-    if key_pressed(&input, KEY_MAP[1]) {
-        player_transform.translation.x -= 1. * BASE_MOVE_SPEED * time.delta_secs();
+    if input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft) {
+        player_transform.translation.x -=
+            1. * (BASE_MOVE_SPEED + player.movement_speed_mod) * time.delta_secs();
         sprite.flip_x = true;
     }
-    if key_pressed(&input, KEY_MAP[2]) {
-        player_transform.translation.y -= 1. * BASE_MOVE_SPEED * time.delta_secs();
+    if input.pressed(KeyCode::KeyS) || input.pressed(KeyCode::ArrowDown) {
+        player_transform.translation.y -=
+            1. * (BASE_MOVE_SPEED + player.movement_speed_mod) * time.delta_secs();
     }
-    if key_pressed(&input, KEY_MAP[3]) {
-        player_transform.translation.x += 1. * BASE_MOVE_SPEED * time.delta_secs();
+    if input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight) {
+        player_transform.translation.x +=
+            1. * (BASE_MOVE_SPEED + player.movement_speed_mod) * time.delta_secs();
         sprite.flip_x = false;
     }
 }

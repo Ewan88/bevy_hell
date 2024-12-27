@@ -125,7 +125,8 @@ fn update_health(
     };
 
     let health = std::cmp::max(player.health as i32, 0);
-    **health_text = format!("Health: {}", health);
+    let max_health = player.max_health;
+    **health_text = format!("HP: {}/{}", health, max_health);
 }
 
 fn update_xp(player_query: Query<&Player>, mut xp_query: Query<&mut Text, With<XPText>>) {
@@ -137,7 +138,7 @@ fn update_xp(player_query: Query<&Player>, mut xp_query: Query<&mut Text, With<X
         return;
     };
 
-    **xp_text = format!("XP: {} / {}", player.xp, player.next_level);
+    **xp_text = format!("XP: {}/{}", player.xp, player.next_level);
 }
 
 fn update_level(

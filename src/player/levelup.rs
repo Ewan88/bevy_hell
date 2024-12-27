@@ -7,10 +7,7 @@ use bevy::{color, prelude::*};
 pub struct LevelUpMenu;
 
 #[derive(Component)]
-pub struct Button;
-
-#[derive(Component)]
-enum MenuButtonAction {
+pub enum MenuButtonAction {
     AttackSpeed,
     MovementSpeed,
     Health,
@@ -24,7 +21,7 @@ pub fn gain_level(
         return;
     };
 
-    if player.xp > player.next_level {
+    if player.xp >= player.next_level {
         player.level += 1;
         player.next_level = player.xp_to_next_level();
         game_state.set(GameState::Paused);
@@ -33,12 +30,11 @@ pub fn gain_level(
 
 pub fn spawn_levelup_menu(mut commands: Commands) {
     let button_node = Node {
-        width: Val::Px(200.),
-        height: Val::Px(50.),
-        margin: UiRect::all(Val::Px(10.0)),
+        width: Val::Px(300.0),
+        height: Val::Px(65.0),
+        margin: UiRect::all(Val::Px(20.0)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
-        flex_direction: FlexDirection::Row,
         ..default()
     };
 
@@ -88,7 +84,7 @@ pub fn spawn_levelup_menu(mut commands: Commands) {
                         ))
                         .with_children(|parent| {
                             parent.spawn((
-                                Text::new("Attack Speed"),
+                                Text::new("Attack Speed +10%"),
                                 button_text_font.clone(),
                                 TextColor(Color::BLACK),
                             ));
@@ -103,7 +99,7 @@ pub fn spawn_levelup_menu(mut commands: Commands) {
                         ))
                         .with_children(|parent| {
                             parent.spawn((
-                                Text::new("Movement Speed"),
+                                Text::new("Movement Speed +25%"),
                                 button_text_font.clone(),
                                 TextColor(Color::BLACK),
                             ));
@@ -118,11 +114,49 @@ pub fn spawn_levelup_menu(mut commands: Commands) {
                         ))
                         .with_children(|parent| {
                             parent.spawn((
-                                Text::new("Health"),
+                                Text::new("Health +25"),
                                 button_text_font.clone(),
                                 TextColor(Color::BLACK),
                             ));
                         });
                 });
         });
+}
+
+pub fn menu_action(
+    interaction_query: Query<
+        (&Interaction, &MenuButtonAction),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut player_query: Query<&mut Player>,
+    mut game_state: ResMut<NextState<GameState>>,
+) {
+    let Ok(mut player) = player_query.get_single_mut() else {
+        return;
+    };
+
+    for (interaction, menu_button_action) in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            match menu_button_action {
+                MenuButtonAction::AttackSpeed => {
+                    player.attack_speed_mod += 0.1;
+                    game_state.set(GameState::Running);
+                }
+                MenuButtonAction::MovementSpeed => {
+                    player.movement_speed_mod += 0.25;
+                    game_state.set(GameState::Running);
+                }
+                MenuButtonAction::Health => {
+                    player.max_health += 25.0;
+                    game_state.set(GameState::Running);
+                }
+            }
+        }
+    }
+}
+
+pub fn despawn_menu(mut commands: Commands, query: Query<Entity, With<LevelUpMenu>>) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
 }

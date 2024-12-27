@@ -9,6 +9,8 @@ pub struct Player {
     pub xp: u32,
     pub level: u32,
     pub next_level: u32,
+    pub movement_speed_mod: f32,
+    pub attack_speed_mod: f32,
 }
 
 impl Player {
@@ -21,6 +23,8 @@ impl Player {
             xp: 0,
             level: 1,
             next_level: 1000,
+            movement_speed_mod: 0.,
+            attack_speed_mod: 0.,
         }
     }
 

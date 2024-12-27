@@ -7,6 +7,8 @@ use crate::{
     CollisionSet, DespawnSet, GameState, SpawnSet, AUDIO_VOLUME,
 };
 
+const ATTACK_SPEED: f32 = 2.0;
+
 #[derive(Component)]
 pub struct Attack {
     pub lifetime: Timer,
@@ -55,7 +57,7 @@ impl AttackSpawner {
         next.pause();
 
         Self {
-            cooldown: Timer::from_seconds(2.0, TimerMode::Repeating),
+            cooldown: Timer::from_seconds(ATTACK_SPEED, TimerMode::Repeating),
             next_attack: next,
             n_attacks: 2,
             attack_i: 0,
@@ -69,17 +71,25 @@ fn setup_spawn_timer(mut commands: Commands) {
 
 fn spawn_attacks(
     mut commands: Commands,
-    player_query: Query<&Transform, With<Player>>,
+    player_query: Query<(&Transform, &Player), With<Player>>,
     icon: Res<Images>,
     audio: Res<Audio>,
     mut spawner: ResMut<AttackSpawner>,
     time: Res<Time>,
 ) {
-    spawner.cooldown.tick(time.delta());
-    spawner.next_attack.tick(time.delta());
-    let Ok(&player_transform) = player_query.get_single() else {
+    let Ok((player_transform, player)) = player_query.get_single() else {
         return;
     };
+
+    let attack_speed_mod = player.attack_speed_mod;
+    let base_cooldown = ATTACK_SPEED;
+    let adjusted_cooldown = base_cooldown * (1.0 - attack_speed_mod);
+
+    spawner
+        .cooldown
+        .set_duration(std::time::Duration::from_secs_f32(adjusted_cooldown));
+    spawner.cooldown.tick(time.delta());
+    spawner.next_attack.tick(time.delta());
 
     if spawner.cooldown.finished() || spawner.next_attack.finished() {
         if spawner.attack_i < spawner.n_attacks - 1 {
