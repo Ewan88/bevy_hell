@@ -110,7 +110,7 @@ pub fn enemy_attack(
     mut commands: Commands,
     audio: Res<Audio>,
     mut player_query: Query<(&mut Player, &Transform), (With<Player>, Without<Enemy>)>,
-    enemy_query: Query<&Transform, (With<Enemy>, Without<Player>)>,
+    enemy_query: Query<(&Transform, &Enemy), (With<Enemy>, Without<Player>)>,
     mut attack_timer: ResMut<AttackTimer>,
     audio_query: Query<&PlayerHitSound>,
     time: Res<Time>,
@@ -119,7 +119,11 @@ pub fn enemy_attack(
         return;
     };
 
-    for transform in enemy_query.iter() {
+    for (transform, enemy) in enemy_query.iter() {
+        if enemy.health <= 0. {
+            continue;
+        }
+
         let distance = Vec2::new(
             player_transform.translation.x - transform.translation.x,
             player_transform.translation.y - transform.translation.y,
