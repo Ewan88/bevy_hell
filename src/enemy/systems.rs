@@ -5,7 +5,7 @@ use crate::{
     BASE_MOVE_SPEED,
 };
 
-use bevy::audio::Volume;
+use bevy::audio::{PlaybackMode, Volume};
 use bevy::{color, prelude::*};
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
@@ -30,11 +30,6 @@ pub fn spawn_enemies(
     let Ok(&player_transform) = player_query.get_single() else {
         return;
     };
-
-    let enemy_count = enemy_query.iter().count();
-    if enemy_count > 10000 {
-        return;
-    }
 
     timer.countdown.tick(time.delta());
 
@@ -145,9 +140,15 @@ pub fn enemy_attack(
 
         if distance.length() < 32. && attack_timer.countdown.finished() {
             if audio_query.is_empty() {
+                let mut rng = SmallRng::from_entropy();
                 commands.spawn((
                     AudioPlayer::<AudioSource>(audio.health_down.clone()),
-                    PlaybackSettings::ONCE.with_volume(Volume::new(AUDIO_VOLUME / 2.)),
+                    PlaybackSettings {
+                        mode: PlaybackMode::Once,
+                        volume: Volume::new(AUDIO_VOLUME / 2.),
+                        speed: rng.gen_range(0.95..1.05),
+                        ..default()
+                    },
                     PlayerHitSound {
                         timer: Timer::from_seconds(5., TimerMode::Once),
                     },
@@ -161,21 +162,15 @@ pub fn enemy_attack(
 
 pub fn despawn_enemies(
     mut commands: Commands,
-    enemy_query: Query<(&Transform, Entity, &Enemy), With<Enemy>>,
-    mut player_query: Query<(&Transform, &mut Player), With<Player>>,
+    enemy_query: Query<(Entity, &Enemy), With<Enemy>>,
+    mut player_query: Query<&mut Player, With<Player>>,
     time: Res<Time>,
 ) {
-    let Ok((player_transform, mut player)) = player_query.get_single_mut() else {
+    let Ok(mut player) = player_query.get_single_mut() else {
         return;
     };
-    for (transform, entity, enemy) in enemy_query.iter() {
-        let distance = Vec2::new(
-            player_transform.translation.x - transform.translation.x,
-            player_transform.translation.y - transform.translation.y,
-        );
-        if distance.length() > 4000. || distance.length() < -4000. {
-            commands.entity(entity).despawn();
-        } else if enemy.health <= 0. {
+    for (entity, enemy) in enemy_query.iter() {
+        if enemy.health <= 0. {
             let diff = enemy.last_damage - time.elapsed_secs_f64();
             if diff < -0.5 {
                 player.gain_xp(25);

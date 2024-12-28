@@ -1,4 +1,8 @@
-use bevy::{audio::Volume, prelude::*};
+use bevy::{
+    audio::{PlaybackMode, Volume},
+    prelude::*,
+};
+use rand::{rngs::SmallRng, Rng, SeedableRng};
 
 use crate::{
     assets::{Audio, Images},
@@ -109,15 +113,21 @@ fn spawn_attacks(
             x += 50.;
         }
 
+        let mut rng = SmallRng::from_entropy();
         commands.spawn((
             Sprite {
                 image: icon.slash_attack.clone(),
-                ..Default::default()
+                ..default()
             },
             Transform::from_xyz(x, player_transform.translation.y, 0.0),
             Attack::new(),
             AudioPlayer::<AudioSource>(audio.slash_attack.clone()),
-            PlaybackSettings::ONCE.with_volume(Volume::new(AUDIO_VOLUME)),
+            PlaybackSettings {
+                mode: PlaybackMode::Once,
+                volume: Volume::new(AUDIO_VOLUME),
+                speed: rng.gen_range(0.95..1.05),
+                ..default()
+            },
         ));
     }
 }
