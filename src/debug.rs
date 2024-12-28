@@ -1,7 +1,10 @@
 use bevy::{color, prelude::*};
 use sysinfo::System;
 
-use crate::player::components::Player;
+use crate::{
+    enemy::{self, components::Enemy},
+    player::components::Player,
+};
 
 #[derive(Component)]
 pub struct DebugText;
@@ -51,6 +54,7 @@ fn build_debug_text(mut commands: Commands) {
 fn update_debug_text(
     mut text_query: Query<&mut Text, With<DebugText>>,
     player_query: Query<&Transform, With<Player>>,
+    enemy_query: Query<&Enemy>,
     mut system_info: ResMut<SystemInfo>,
 ) {
     let Ok(transform) = player_query.get_single() else {
@@ -66,17 +70,20 @@ fn update_debug_text(
     let memory_used = system_info.system.used_memory() / 1024 / 1024 / 1024;
     let memory_total = system_info.system.total_memory() / 1024 / 1024 / 1024;
     let cpu_usage = system_info.system.global_cpu_usage().floor();
+    let n_enemies = enemy_query.iter().count();
 
     **text = format!(
         "
         pos: {:.2} {:.2}\n
         {}/{}\n
-        {}%
+        {}%\n
+        {} enemies
         ",
         transform.translation.x,
         transform.translation.y,
         memory_used,
         memory_total,
-        cpu_usage
+        cpu_usage,
+        n_enemies
     );
 }
