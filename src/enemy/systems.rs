@@ -24,7 +24,7 @@ pub fn spawn_enemies(
     enemy_query: Query<&Enemy>,
     icon: Res<Images>,
     mut timer: ResMut<SpawnTimer>,
-    time: Res<Time>,
+    time: Res<Time<Virtual>>,
     mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let Ok(&player_transform) = player_query.get_single() else {

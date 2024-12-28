@@ -47,7 +47,6 @@ pub struct DespawnSet;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpawnSet;
-
 fn main() {
     App::new()
         .add_plugins((
@@ -81,11 +80,21 @@ fn main() {
             Update,
             listen_for_restart.run_if(in_state(GameState::GameOver)),
         )
+        .add_systems(OnEnter(GameState::Running), resume_virtual_time)
+        .add_systems(OnExit(GameState::Running), pause_virtual_time)
         .run();
 }
 
 fn run_game(mut game_state: ResMut<NextState<GameState>>) {
     game_state.set(GameState::Running);
+}
+
+fn pause_virtual_time(mut time: ResMut<Time<Virtual>>) {
+    time.pause();
+}
+
+fn resume_virtual_time(mut time: ResMut<Time<Virtual>>) {
+    time.unpause();
 }
 
 fn play_background_audio(mut commands: Commands, audio: Res<Audio>) {

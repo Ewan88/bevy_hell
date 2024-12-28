@@ -156,7 +156,10 @@ fn update_level(
     **level_text = format!("Level: {}", player.level);
 }
 
-fn update_time(time: Res<Time>, mut time_query: Query<&mut Text, With<TimeText>>) {
+fn update_time(
+    time: Res<Time<Virtual>>,
+    mut time_query: Query<&mut Text, With<TimeText>>,
+) {
     let Ok(mut time_text) = time_query.get_single_mut() else {
         return;
     };
