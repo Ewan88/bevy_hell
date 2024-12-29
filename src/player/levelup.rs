@@ -114,7 +114,7 @@ pub fn spawn_levelup_menu(mut commands: Commands) {
                         ))
                         .with_children(|parent| {
                             parent.spawn((
-                                Text::new("Health +25"),
+                                Text::new("Heal and gain +25 max HP"),
                                 button_text_font.clone(),
                                 TextColor(Color::BLACK),
                             ));
@@ -148,6 +148,7 @@ pub fn levelup_menu_action(
                 }
                 MenuButtonAction::Health => {
                     player.max_health += 25.0;
+                    player.health = player.max_health;
                     game_state.set(GameState::Running);
                 }
             }
