@@ -1,10 +1,7 @@
 use bevy::{color, prelude::*};
 use sysinfo::System;
 
-use crate::{
-    enemy::{self, components::Enemy},
-    player::components::Player,
-};
+use crate::{enemy::components::Enemy, player::components::Player};
 
 #[derive(Component)]
 pub struct DebugText;
@@ -34,7 +31,7 @@ fn build_debug_text(mut commands: Commands) {
     commands
         .spawn(Node {
             position_type: PositionType::Absolute,
-            left: Val::Percent(0.),
+            left: Val::Percent(-2.5),
             top: Val::Percent(7.5),
             ..default()
         })
@@ -54,7 +51,7 @@ fn build_debug_text(mut commands: Commands) {
 fn update_debug_text(
     mut text_query: Query<&mut Text, With<DebugText>>,
     player_query: Query<&Transform, With<Player>>,
-    enemy_query: Query<&Enemy>,
+    enemy_query: Query<Entity, With<Enemy>>,
     mut system_info: ResMut<SystemInfo>,
 ) {
     let Ok(transform) = player_query.get_single() else {

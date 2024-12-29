@@ -24,9 +24,12 @@ impl Plugin for PlayerPlugin {
                 )
                     .run_if(in_state(GameState::Running)),
             )
-            .add_systems(OnEnter(GameState::Paused), spawn_levelup_menu)
-            .add_systems(Update, menu_action.run_if(in_state(GameState::Paused)))
-            .add_systems(OnExit(GameState::Paused), despawn_menu);
+            .add_systems(OnEnter(GameState::LevelUpScreen), spawn_levelup_menu)
+            .add_systems(
+                Update,
+                levelup_menu_action.run_if(in_state(GameState::LevelUpScreen)),
+            )
+            .add_systems(OnExit(GameState::LevelUpScreen), despawn_levelup_menu);
     }
 }
 

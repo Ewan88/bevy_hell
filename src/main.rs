@@ -34,6 +34,7 @@ pub enum GameState {
     Running,
     GameOver,
     Paused,
+    LevelUpScreen,
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
@@ -78,7 +79,11 @@ fn main() {
         .add_systems(PostStartup, play_background_audio)
         .add_systems(
             Update,
-            listen_for_restart.run_if(in_state(GameState::GameOver)),
+            (
+                listen_for_restart.run_if(in_state(GameState::GameOver)),
+                listen_for_game_pause.run_if(in_state(GameState::Running)),
+                listen_for_unpause.run_if(in_state(GameState::Paused)),
+            ),
         )
         .add_systems(OnEnter(GameState::Running), resume_virtual_time)
         .add_systems(OnExit(GameState::Running), pause_virtual_time)
@@ -99,7 +104,7 @@ fn resume_virtual_time(mut time: ResMut<Time<Virtual>>) {
 
 fn play_background_audio(mut commands: Commands, audio: Res<Audio>) {
     commands.spawn((
-        AudioPlayer::<AudioSource>(audio.background_bleeps.clone()),
+        AudioPlayer::<AudioSource>(audio.background_track.clone()),
         PlaybackSettings::LOOP.with_volume(Volume::new(AUDIO_VOLUME)),
     ));
 }
@@ -118,6 +123,24 @@ fn listen_for_restart(
         for text in text_query.iter() {
             commands.entity(text).despawn_recursive();
         }
+        game_state.set(GameState::Running);
+    }
+}
+
+fn listen_for_game_pause(
+    mut game_state: ResMut<NextState<GameState>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        game_state.set(GameState::Paused);
+    }
+}
+
+fn listen_for_unpause(
+    mut game_state: ResMut<NextState<GameState>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
         game_state.set(GameState::Running);
     }
 }

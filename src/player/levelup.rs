@@ -24,7 +24,7 @@ pub fn gain_level(
     if player.xp >= player.next_level {
         player.level += 1;
         player.next_level = player.xp_to_next_level();
-        game_state.set(GameState::Paused);
+        game_state.set(GameState::LevelUpScreen);
     }
 }
 
@@ -123,7 +123,7 @@ pub fn spawn_levelup_menu(mut commands: Commands) {
         });
 }
 
-pub fn menu_action(
+pub fn levelup_menu_action(
     interaction_query: Query<
         (&Interaction, &MenuButtonAction),
         (Changed<Interaction>, With<Button>),
@@ -155,7 +155,10 @@ pub fn menu_action(
     }
 }
 
-pub fn despawn_menu(mut commands: Commands, query: Query<Entity, With<LevelUpMenu>>) {
+pub fn despawn_levelup_menu(
+    mut commands: Commands,
+    query: Query<Entity, With<LevelUpMenu>>,
+) {
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }

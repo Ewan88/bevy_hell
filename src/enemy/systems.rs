@@ -21,7 +21,6 @@ pub fn setup_attack_timer(mut commands: Commands) {
 pub fn spawn_enemies(
     mut commands: Commands,
     player_query: Query<&Transform, With<Player>>,
-    enemy_query: Query<&Enemy>,
     icon: Res<Images>,
     mut timer: ResMut<SpawnTimer>,
     time: Res<Time<Virtual>>,
