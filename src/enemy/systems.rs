@@ -56,7 +56,7 @@ pub fn spawn_enemies(
                     texture_atlas: Some(TextureAtlas::from(texture_atlas_handle.clone())),
                     ..default()
                 },
-                Transform::from_xyz(x_start + x_offset, y_start + y_offset, 1.),
+                Transform::from_xyz(x_offset, y_offset, 1.),
                 Enemy {
                     health: 10.,
                     last_damage: 0.,
