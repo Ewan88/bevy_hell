@@ -14,7 +14,7 @@ mod ui;
 use std::f32::consts::PI;
 
 use assets::Audio;
-use bevy::{audio::Volume, prelude::*};
+use bevy::{audio::Volume, prelude::*, time::Stopwatch};
 use enemy::components::Enemy;
 use rand::{rngs::SmallRng, Rng};
 use ui::GameOverText;
@@ -48,6 +48,12 @@ pub struct DespawnSet;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpawnSet;
+
+#[derive(Resource)]
+pub struct GlobalStopwatch {
+    clock: Stopwatch,
+}
+
 fn main() {
     App::new()
         .add_plugins((
@@ -85,27 +91,35 @@ fn main() {
                 listen_for_unpause.run_if(in_state(GameState::Paused)),
             ),
         )
-        .add_systems(OnEnter(GameState::Running), resume_virtual_time)
-        .add_systems(OnExit(GameState::Running), pause_virtual_time)
+        .add_systems(Update, tick_clock.run_if(in_state(GameState::Running)))
+        .add_systems(OnEnter(GameState::Running), unpause_clock)
+        .add_systems(OnExit(GameState::Running), pause_clock)
         .run();
 }
 
-fn run_game(mut game_state: ResMut<NextState<GameState>>) {
+fn run_game(mut commands: Commands, mut game_state: ResMut<NextState<GameState>>) {
     game_state.set(GameState::Running);
+    commands.insert_resource(GlobalStopwatch {
+        clock: Stopwatch::new(),
+    });
 }
 
-fn pause_virtual_time(mut time: ResMut<Time<Virtual>>) {
-    time.pause();
+fn tick_clock(mut stopwatch: ResMut<GlobalStopwatch>, time: Res<Time>) {
+    stopwatch.clock.tick(time.delta());
 }
 
-fn resume_virtual_time(mut time: ResMut<Time<Virtual>>) {
-    time.unpause();
+fn pause_clock(mut stopwatch: ResMut<GlobalStopwatch>) {
+    stopwatch.clock.pause();
+}
+
+fn unpause_clock(mut stopwatch: ResMut<GlobalStopwatch>) {
+    stopwatch.clock.unpause();
 }
 
 fn play_background_audio(mut commands: Commands, audio: Res<Audio>) {
     commands.spawn((
         AudioPlayer::<AudioSource>(audio.background_track.clone()),
-        PlaybackSettings::LOOP.with_volume(Volume::new(AUDIO_VOLUME)),
+        PlaybackSettings::LOOP.with_volume(Volume::new(AUDIO_VOLUME / 2.)),
     ));
 }
 
@@ -115,6 +129,7 @@ fn listen_for_restart(
     mut game_state: ResMut<NextState<GameState>>,
     enemy_query: Query<(Entity, &Enemy), With<Enemy>>,
     text_query: Query<Entity, With<GameOverText>>,
+    mut clock: ResMut<GlobalStopwatch>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyR) {
         for enemy in enemy_query.iter() {
@@ -124,6 +139,7 @@ fn listen_for_restart(
             commands.entity(text).despawn_recursive();
         }
         game_state.set(GameState::Running);
+        clock.clock.reset();
     }
 }
 
@@ -151,8 +167,8 @@ pub fn random_point_within_radius(
     player_y: f32,
 ) -> (f32, f32) {
     let angle = rng.gen_range(0.0..PI * 2.0);
-    let min = 320.;
-    let radius = (SCREEN_WIDTH.powi(2) + SCREEN_HEIGHT.powi(2)).sqrt() / 2.0;
+    let min = 1000.;
+    let radius = 2000.;
     let distance = rng.gen_range(min..radius);
     let x = player_x + distance * angle.cos();
     let y = player_y + distance * angle.sin();

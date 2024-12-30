@@ -1,4 +1,4 @@
-use crate::{player::components::Player, GameState};
+use crate::{player::components::Player, GameState, GlobalStopwatch};
 
 use bevy::prelude::*;
 
@@ -157,14 +157,14 @@ fn update_level(
 }
 
 fn update_time(
-    time: Res<Time<Virtual>>,
+    time: Res<GlobalStopwatch>,
     mut time_query: Query<&mut Text, With<TimeText>>,
 ) {
     let Ok(mut time_text) = time_query.get_single_mut() else {
         return;
     };
 
-    let total_seconds = time.elapsed_secs_f64().round() as u32;
+    let total_seconds = time.clock.elapsed_secs_f64().round() as u32;
     let minutes = total_seconds / 60;
     let seconds = total_seconds % 60;
 

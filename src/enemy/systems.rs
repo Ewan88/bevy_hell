@@ -1,9 +1,9 @@
 use super::components::*;
-use crate::random_point_within_radius;
 use crate::{
     animation::AnimationTimer, assets::*, player::components::*, AUDIO_VOLUME,
     BASE_MOVE_SPEED,
 };
+use crate::{random_point_within_radius, GlobalStopwatch};
 
 use bevy::audio::{PlaybackMode, Volume};
 use bevy::{color, prelude::*};
@@ -23,8 +23,9 @@ pub fn spawn_enemies(
     player_query: Query<&Transform, With<Player>>,
     icon: Res<Images>,
     mut timer: ResMut<SpawnTimer>,
-    time: Res<Time<Virtual>>,
+    time: Res<Time>,
     mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
+    watch: Res<GlobalStopwatch>,
 ) {
     let Ok(&player_transform) = player_query.get_single() else {
         return;
@@ -39,7 +40,7 @@ pub fn spawn_enemies(
 
     if timer.countdown.finished() {
         let mut rng = SmallRng::from_entropy();
-        let elapsed_time = time.elapsed_secs();
+        let elapsed_time = watch.clock.elapsed_secs_f64();
         let new_duration = (1. - elapsed_time / 120.).max(0.1);
         let min_spawns = (elapsed_time / 60.).ceil() as i32;
         let max_spawns = (elapsed_time / 30.).ceil() as i32;
@@ -65,7 +66,7 @@ pub fn spawn_enemies(
             )
         }));
 
-        timer.countdown = Timer::from_seconds(new_duration, TimerMode::Repeating);
+        timer.countdown = Timer::from_seconds(new_duration as f32, TimerMode::Repeating);
     }
 }
 
