@@ -76,6 +76,7 @@ fn setup_spawn_timer(mut commands: Commands) {
 fn spawn_attacks(
     mut commands: Commands,
     player_query: Query<(&Transform, &Player), With<Player>>,
+    enemy_query: Query<(&Transform, &Enemy), With<Enemy>>,
     icon: Res<Images>,
     audio: Res<Audio>,
     mut spawner: ResMut<AttackSpawner>,
@@ -84,6 +85,10 @@ fn spawn_attacks(
     let Ok((player_transform, player)) = player_query.get_single() else {
         return;
     };
+
+    if enemy_query.iter().count() == 0 {
+        return;
+    }
 
     let attack_speed_mod = player.attack_speed_mod;
     let base_cooldown = ATTACK_SPEED;
@@ -106,12 +111,26 @@ fn spawn_attacks(
             spawner.attack_i = 0;
         }
 
-        let mut x = player_transform.translation.x;
-        if (spawner.attack_i % 2) == 0 {
-            x -= 50.;
-        } else {
-            x += 50.;
+        let mut closest_enemy_direction = Vec2::ZERO;
+        let mut min_distance = f32::MAX;
+        for (enemy_transform, enemy) in enemy_query.iter() {
+            if enemy.health <= 0. {
+                continue;
+            }
+            let direction = Vec2::new(
+                enemy_transform.translation.x - player_transform.translation.x,
+                enemy_transform.translation.y - player_transform.translation.y,
+            );
+            let distance = direction.length();
+            if distance < min_distance {
+                min_distance = distance;
+                closest_enemy_direction = direction.normalize();
+            }
         }
+
+        let spawn_distance = 50.0;
+        let spawn_position = player_transform.translation.truncate()
+            + closest_enemy_direction * spawn_distance;
 
         let mut rng = SmallRng::from_entropy();
         commands.spawn((
@@ -119,7 +138,7 @@ fn spawn_attacks(
                 image: icon.slash_attack.clone(),
                 ..default()
             },
-            Transform::from_xyz(x, player_transform.translation.y, 0.0),
+            Transform::from_xyz(spawn_position.x, spawn_position.y, 0.0),
             Attack::new(),
             AudioPlayer::<AudioSource>(audio.slash_attack.clone()),
             PlaybackSettings {

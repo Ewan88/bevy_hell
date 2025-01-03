@@ -12,20 +12,13 @@ impl Plugin for EnemyPlugin {
             .add_systems(
                 Update,
                 (
-                    spawn_enemies
-                        .in_set(SpawnSet)
-                        .run_if(in_state(GameState::Running)),
-                    enemy_movement
-                        .in_set(MovementSet)
-                        .run_if(in_state(GameState::Running)),
-                    enemy_attack
-                        .in_set(CollisionSet)
-                        .run_if(in_state(GameState::Running)),
-                    color_change_cooldown.run_if(in_state(GameState::Running)),
-                    despawn_enemies
-                        .in_set(DespawnSet)
-                        .run_if(in_state(GameState::Running)),
-                ),
+                    spawn_enemies.in_set(SpawnSet),
+                    enemy_movement.in_set(MovementSet),
+                    enemy_attack.in_set(CollisionSet),
+                    //color_change_cooldown,
+                    despawn_enemies.in_set(DespawnSet),
+                )
+                    .run_if(in_state(GameState::Running)),
             );
     }
 }

@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub struct Images {
     pub samurai: Handle<Image>,
     pub blob: Handle<Image>,
+    pub blob_death: Handle<Image>,
     pub slash_attack: Handle<Image>,
     pub health_potion: Handle<Image>,
 }
@@ -33,6 +34,7 @@ fn setup_images(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(Images {
         samurai: asset_server.load("samurai.png"),
         blob: asset_server.load("blob.png"),
+        blob_death: asset_server.load("blob_death.png"),
         slash_attack: asset_server.load("slash_attack.png"),
         health_potion: asset_server.load("health_potion.png"),
     });

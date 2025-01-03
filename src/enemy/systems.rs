@@ -1,12 +1,11 @@
 use super::components::*;
 use crate::{
-    animation::AnimationTimer, assets::*, player::components::*, AUDIO_VOLUME,
-    BASE_MOVE_SPEED,
+    animation::*, assets::*, player::components::*, AUDIO_VOLUME, BASE_MOVE_SPEED,
 };
 use crate::{random_point_within_radius, GlobalStopwatch};
 
 use bevy::audio::{PlaybackMode, Volume};
-use bevy::{color, prelude::*};
+use bevy::prelude::*;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
@@ -33,12 +32,12 @@ pub fn spawn_enemies(
 
     timer.countdown.tick(time.delta());
 
-    let texture_handle = icon.blob.clone();
-    let texture_atlas =
-        TextureAtlasLayout::from_grid(UVec2::new(32, 32), 6, 1, None, None);
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
-
     if timer.countdown.finished() {
+        let texture_handle = icon.blob.clone();
+        let texture_atlas =
+            TextureAtlasLayout::from_grid(UVec2::new(32, 32), 6, 1, None, None);
+        let texture_atlas_handle = texture_atlases.add(texture_atlas);
+
         let mut rng = SmallRng::from_entropy();
         let elapsed_time = watch.clock.elapsed_secs_f64();
         let new_duration = (1. - elapsed_time / 120.).max(0.1);
@@ -63,6 +62,11 @@ pub fn spawn_enemies(
                     last_damage: 0.,
                 },
                 AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+                AnimationIndices {
+                    first: 1,
+                    last: 5,
+                    current: 1,
+                },
             )
         }));
 
@@ -162,34 +166,61 @@ pub fn enemy_attack(
 
 pub fn despawn_enemies(
     mut commands: Commands,
-    enemy_query: Query<(Entity, &Enemy), With<Enemy>>,
+    enemy_query: Query<(Entity, &Enemy, &Transform), With<Enemy>>,
     mut player_query: Query<&mut Player, With<Player>>,
-    time: Res<Time>,
+    icon: Res<Images>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let Ok(mut player) = player_query.get_single_mut() else {
         return;
     };
-    for (entity, enemy) in enemy_query.iter() {
-        if enemy.health <= 0. {
-            let diff = enemy.last_damage - time.elapsed_secs_f64();
-            if diff < -0.5 {
-                player.gain_xp(25);
+
+    let corpses: Vec<Transform> = enemy_query
+        .iter()
+        .filter_map(|(entity, enemy, transform)| {
+            if enemy.health <= 0. {
                 commands.entity(entity).despawn();
+                player.gain_xp(25);
+                Some(*transform)
+            } else {
+                None
             }
-        }
-    }
+        })
+        .collect();
+
+    let texture_handle = icon.blob_death.clone();
+    let texture_atlas =
+        TextureAtlasLayout::from_grid(UVec2::new(32, 32), 6, 1, None, None);
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+
+    commands.spawn_batch(corpses.into_iter().map(move |transform| {
+        (
+            Sprite {
+                image: texture_handle.clone(),
+                texture_atlas: Some(TextureAtlas::from(texture_atlas_handle.clone())),
+                ..default()
+            },
+            transform,
+            AnimationTimerOnce(Timer::from_seconds(0.1, TimerMode::Repeating)),
+            AnimationIndices {
+                first: 1,
+                last: 5,
+                current: 1,
+            },
+        )
+    }));
 }
 
-pub fn color_change_cooldown(
-    mut enemy_query: Query<(&Enemy, &mut Sprite), With<Enemy>>,
-    time: Res<Time>,
-) {
-    for (enemy, mut sprite) in enemy_query.iter_mut() {
-        let diff = enemy.last_damage - time.elapsed_secs_f64();
-        if diff > -0.2 {
-            sprite.color = Color::Srgba(color::palettes::basic::GRAY);
-        } else if diff < -0.5 {
-            sprite.color = Color::default();
-        }
-    }
-}
+// pub fn color_change_cooldown(
+//     mut enemy_query: Query<(&Enemy, &mut Sprite), With<Enemy>>,
+//     time: Res<Time>,
+// ) {
+//     for (enemy, mut sprite) in enemy_query.iter_mut() {
+//         let diff = enemy.last_damage - time.elapsed_secs_f64();
+//         if diff > -0.2 {
+//             sprite.color = Color::Srgba(color::palettes::basic::GRAY);
+//         } else if diff < -0.5 {
+//             sprite.color = Color::default();
+//         }
+//     }
+// }
